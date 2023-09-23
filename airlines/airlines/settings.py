@@ -27,7 +27,9 @@ SECRET_KEY = "django-insecure-0@+esqt9_$%h-g2f&r1n0=0lh*!g^m!+e%vfgd^m0)_jt^hsac
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-# AUTH_USER_MODEL = 'mainapp.User'
+
+AUTH_USER_MODEL = 'mainapp.Users'
+
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -53,7 +55,10 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ROOT_URLCONF = "airlines.urls"
 
@@ -112,6 +117,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 3,
+        }
+    },
+]
+
+AUTH_PASSWORD_MIN_LENGTH = 3
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
