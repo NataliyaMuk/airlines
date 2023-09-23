@@ -6,7 +6,7 @@ from django.contrib.auth.views import LoginView
 from django.views import View
 import datetime
 from .models import Sessions
-
+from django.db import connection, transaction
 
 def register(request):
     if request.method == 'POST':
@@ -18,9 +18,10 @@ def register(request):
             login(request, user)
 
             # инициируем сессию пользователя
-            Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
-            # cursor.execute("INSERT INTO `sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
-            # cursor.execute("INSERT INTO `sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
+            # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
+            # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
+            cursor = connection.cursor()
+            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
             return redirect('home')  # Замените 'home' на URL, куда перенаправлять после регистрации
     else:
         form = CustomUserCreationForm()
