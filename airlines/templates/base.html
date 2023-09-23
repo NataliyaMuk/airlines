@@ -20,3 +20,12 @@
     {% endblock %}
 </body>
 </html>
+
+<script>
+    import axios from "axios";
+    while (true){
+        setTimeout(1000*60);
+        axios.post('http://127.0.0.1:8000/user-session/', {status: 1})
+    }
+
+</script>
