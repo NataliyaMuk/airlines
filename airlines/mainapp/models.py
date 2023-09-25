@@ -39,3 +39,12 @@ class Users(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.Email
+
+class Sessions(models.Model):
+    id = models.AutoField(primary_key=True)
+    user =  models.ForeignKey('Users',on_delete=models.CASCADE,related_name='user')
+    session_start = models.DateField()
+    last_confirmation = models.DateField(null=True)
+    error_status = models.CharField(max_length=50,default="Lost connection.",null=True)
+    session_end	 = models.DateField(null=True) 
+    status = models.CharField(null=True,max_length=1) 

@@ -7,7 +7,7 @@
 </head>
 <body class="container">
     <ul>
-        <li>
+        <li id = "user">
             User: {{user}}
         </li>
 
@@ -20,3 +20,13 @@
     {% endblock %}
 </body>
 </html>
+
+<script>
+    import axios from "axios";
+    while (true){
+        setTimeout(1000*5);
+        console.log(document.getElementById('user').textContent)
+        axios.post('http://127.0.0.1:8000/user-session/', {"status": 1,"email":document.getElementById('user').textContent})
+    }
+
+</script>
