@@ -47,3 +47,4 @@ class Sessions(models.Model):
     last_confirmation = models.DateField(null=True)
     error_status = models.CharField(max_length=50,default="Lost connection.",null=True)
     session_end	 = models.DateField(null=True) 
+    status = models.CharField(null=True,max_length=1) 

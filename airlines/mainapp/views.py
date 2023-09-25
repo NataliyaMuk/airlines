@@ -21,7 +21,8 @@ def register(request):
             # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
             # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
             cursor = connection.cursor()
-            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
+            
+            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
             return redirect('home')  # Замените 'home' на URL, куда перенаправлять после регистрации
     else:
         form = CustomUserCreationForm()
@@ -30,10 +31,24 @@ def register(request):
 def user_session(request):
     if request.method == 'POST':
         status = request.POST['status']
+        email = request.POST['email']
         if status == 1 :
-            now = datetime.datetime.now()
+            cursor = connection.cursor()
+            cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= NOW() JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = %s and  mainapp_sessions.status = `0`')",[email])
 
 
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'  # Создайте шаблон login.html
     authentication_form = CustomAuthenticationForm()
+
+
+    # для логина
+    # if  cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
+    #     cursor.execute("UPDATE `mainapp_sessions` SET `status`= `1` WHERE user_id = %s and  status = `0`')",[user.id]) #закрываваем сессию с ошибкой.
+    #cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id] #начинаем новую сессию
+
+    # для разлогирования
+    # cursor.execute("UPDATE `mainapp_sessions` SET `status`= `1`,`error_status`=NULL,`session_end`= NOW() WHERE user_id = %s and status = `0`')",[user.id])
+
+    # для вывода сессий по пользователею
+    # сursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
