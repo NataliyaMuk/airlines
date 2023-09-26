@@ -31,7 +31,8 @@ ALLOWED_HOSTS = ['*']
 AUTH_USER_MODEL = 'mainapp.Users'
 
 
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = 'login_redirect'
+
 LOGOUT_REDIRECT_URL = "/"
 
 

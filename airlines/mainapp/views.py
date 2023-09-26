@@ -7,6 +7,9 @@ from django.views import View
 import datetime
 from .models import Sessions
 from django.db import connection, transaction
+from .decorators import admin_required
+
+
 
 def register(request):
     if request.method == 'POST':
@@ -23,10 +26,11 @@ def register(request):
             cursor = connection.cursor()
             
             cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
-            return redirect('home')  # Замените 'home' на URL, куда перенаправлять после регистрации
+            return redirect('home')  
     else:
         form = CustomUserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
+
 
 def user_session(request):
     if request.method == 'POST':
@@ -38,7 +42,7 @@ def user_session(request):
 
 
 class CustomLoginView(LoginView):
-    template_name = 'registration/login.html'  # Создайте шаблон login.html
+    template_name = 'registration/login.html'
     authentication_form = CustomAuthenticationForm()
 
 
@@ -52,3 +56,23 @@ class CustomLoginView(LoginView):
 
     # для вывода сессий по пользователею
     # сursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def login_redirect(request):
+    if request.user.RoleID == 1:  
+        return redirect('home_admin')
+    else:
+        return redirect('home_user')
+
+
+@admin_required #кастомный декоратор
+def admin_home(request):
+    # Логика для главной страницы администратора
+    return render(request, 'home_admin.html')
+
+
+def user_home(request):
+    # Логика для главной страницы обычных пользователей
+    return render(request, 'home_user.html')
