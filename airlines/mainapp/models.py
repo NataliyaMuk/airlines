@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from datetime import datetime
 
 
 class CustomUserManager(BaseUserManager):
@@ -22,16 +23,48 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
+    
+class Countries(models.Model):
+    id = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=50)
+    class Meta:
+        managed = False  # Это указывает Django не создавать эту таблицу
+        db_table = 'countries'
+
+class Roles(models.Model):
+    id = models.AutoField(primary_key=True)
+    Title = models.CharField(max_length=50)
+    class Meta:
+        managed = False  # Это указывает Django не создавать эту таблицу
+        db_table = 'roles'
+
+class Offices(models.Model):
+    id = models.AutoField(primary_key=True)
+    CountryID = models.ForeignKey(Countries, on_delete=models.CASCADE, db_column='CountryID')
+    Title = models.CharField(max_length=50)
+    Phone = models.CharField(max_length=50)
+    Contact = models.CharField(max_length=250)
+    class Meta:
+        managed = False  # Это указывает Django не создавать эту таблицу
+        db_table = 'offices'
+
 
 class Users(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
-    RoleID = models.IntegerField()
+    RoleID = models.ForeignKey(Roles, on_delete=models.CASCADE, db_column='RoleID')
     Email = models.CharField(max_length=150, unique=True)
     FirstName = models.CharField(max_length=50, null=True)
     LastName = models.CharField(max_length=50)
-    OfficeID = models.IntegerField(null=True) 
+    OfficeID = models.ForeignKey(Offices, on_delete=models.CASCADE, null=True, db_column='OfficeID')
     Birthdate = models.DateField(null=True)
     Active = models.SmallIntegerField(null=True)
+
+    # Метод для вычисления возраста
+    def calculate_age(self):
+        today = datetime.today()
+        dob = self.Birthdate
+        age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        return age
 
     objects = CustomUserManager()
 

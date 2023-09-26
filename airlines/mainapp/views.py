@@ -8,28 +8,29 @@ import datetime
 from .models import Sessions
 from django.db import connection, transaction
 from .decorators import admin_required
+from .models import Users
 
 
 
-def register(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            # Логиним пользователя после успешной регистрации
+# def register(request):
+#     if request.method == 'POST':
+#         form = CustomUserCreationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#             # Логиним пользователя после успешной регистрации
             
-            login(request, user)
+#             login(request, user)
 
-            # инициируем сессию пользователя
-            # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
-            # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
-            cursor = connection.cursor()
+#             # инициируем сессию пользователя
+#             # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
+#             # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
+#             cursor = connection.cursor()
             
-            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
-            return redirect('home')  
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+#             cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
+#             return redirect('home')  
+#     else:
+#         form = CustomUserCreationForm()
+#     return render(request, 'registration/register.html', {'form': form})
 
 
 def user_session(request):
@@ -61,18 +62,45 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def login_redirect(request):
-    if request.user.RoleID == 1:  
+    if request.user.RoleID.Title == "Administrator":  
         return redirect('home_admin')
     else:
         return redirect('home_user')
 
 
-@admin_required #кастомный декоратор
-def admin_home(request):
-    # Логика для главной страницы администратора
-    return render(request, 'home_admin.html')
-
-
 def user_home(request):
     # Логика для главной страницы обычных пользователей
     return render(request, 'home_user.html')
+
+
+@admin_required #кастомный декоратор
+def admin_home(request):
+
+    selected_office = request.GET.get('office')
+    if selected_office and selected_office != '0':
+        users = Users.objects.filter(OfficeID=selected_office)
+    else:
+        users = Users.objects.all()
+
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Логиним пользователя после успешной регистрации
+            
+            login(request, user)
+
+            # инициируем сессию пользователя
+            # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
+            # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
+            cursor = connection.cursor()
+            
+            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
+            return redirect('home')  
+    else:
+        form = CustomUserCreationForm()
+
+    context = {'users': users, 'form': form}
+
+    return render(request, 'home_admin.html', context)

@@ -1,12 +1,19 @@
 from django.urls import path, include
-from .views import register,user_session, admin_home, user_home, login_redirect
+from .views import user_session, admin_home, user_home, login_redirect
 from django.views.generic import TemplateView
+from airlines import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name="home.html"), name='home'),
-    path('register/', register, name='register'),
+    # path('register/', register, name='register'),
     path('user-session/', user_session, name='user-session/'),
     path('home_admin/', admin_home, name='home_admin'),
     path('home_user/', user_home, name='home_user'),
     path('login_redirect/', login_redirect, name='login_redirect'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+

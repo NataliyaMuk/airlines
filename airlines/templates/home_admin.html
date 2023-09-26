@@ -4,5 +4,81 @@
     <h1>Home page admin</h1>
     <hr>
 
+    <a href="#addUserModal">Add user</a>
+    <a href="{% url 'logout' %}">Exit</a>
+    <hr>
+    <select id="office-select">
+        <option value="0">All offices</option>
+        <option value="0">All offices</option>
+        <option value="1">Abu dhabi</option>
+        <option value="3">Cairo</option>
+        <option value="4">Bahrain</option>
+        <option value="5">Doha</option>
+        <option value="6">Riyadh</option>
+    </select>
+
+    <hr>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>LastName</th>
+                <th>Age</th>
+                <th>User Role</th>
+                <th>Email Address</th>
+                <th>Office</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.FirstName }}</td>
+                    <td>{{ user.LastName }}</td>
+                    <td>{{ user.calculate_age }}</td>
+                    <td>{{ user.RoleID.Title }}</td>
+                    <td>{{ user.Email }}</td>
+                    <td>{{ user.OfficeID.Title }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+
+    <button id="button1">Change Role</button>
+    <button id="button2">Enable/Disable Login</button>
+
+    <!-- Модальное окно для добавления пользователя -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Add user</h2>
+        {% if form.errors %}
+            <p>{{form.errors.error}}</p>
+        {% endif %}
+        <form action="{% url 'home_admin' %}" method="post">
+            {{form}}
+            {% csrf_token %}
+            <button type="submit">Save</button>
+            <button>Cancel</button>
+        </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('office-select').addEventListener('change', function() {
+            var selectedOffice = this.value;
+            window.location.href = '?office=' + selectedOffice;
+        });
+        document.querySelector('a[href="#addUserModal"]').addEventListener('click', function() {
+        document.getElementById('addUserModal').style.display = 'block';
+        });
+
+        // Закрыть модальное окно
+        document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('addUserModal').style.display = 'none';
+        });
+    </script>
     
 {% endblock %}
