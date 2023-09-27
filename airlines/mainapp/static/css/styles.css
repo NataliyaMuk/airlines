@@ -8,20 +8,38 @@
     background-color: rgba(0, 0, 0, 0.7);
   }
   
-  .modal-content {
+.modal-content {
     background-color: #fff;
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
     width: 80%;
     max-width: 400px;
     position: relative;
-  }
+}
   
-  .close {
+.close {
     position: absolute;
     top: 0;
     right: 0;
     padding: 10px;
     cursor: pointer;
-  }
+}
+
+
+  /* Стилизация input в форме */
+#addUserModal input {
+  width: 70%;
+  padding: 3px;
+  margin-bottom: 10px;
+}
+
+/* Стилизация кнопок в форме */
+#addUserModal button {
+  padding: 6px;
+  border: 1px solid;
+}
+
+#addUserModal p {
+  color: red;
+}

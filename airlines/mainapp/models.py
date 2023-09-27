@@ -30,6 +30,8 @@ class Countries(models.Model):
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'countries'
+    def __str__(self):
+        return self.Name
 
 class Roles(models.Model):
     id = models.AutoField(primary_key=True)
@@ -37,6 +39,8 @@ class Roles(models.Model):
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'roles'
+    def __str__(self):
+        return self.Title
 
 class Offices(models.Model):
     id = models.AutoField(primary_key=True)
@@ -47,6 +51,8 @@ class Offices(models.Model):
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'offices'
+    def __str__(self):
+        return self.Title
 
 
 class Users(AbstractBaseUser, PermissionsMixin):

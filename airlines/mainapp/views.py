@@ -82,25 +82,54 @@ def admin_home(request):
     else:
         users = Users.objects.all()
 
-
+# ЛОГИКА РЕГИСТРАЦИИ ТЕПЕРЬ ТУТ!!!! ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ НОВЫХ ЮЗЕРОВ
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            # Логиним пользователя после успешной регистрации
-            
-            login(request, user)
+            form.save()
+
+            # СЕССИЯ ПОСЛЕ ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ НЕ НУЖНА ТЕПЕРЬ!!!!!!!!!!!!!!!!!
 
             # инициируем сессию пользователя
             # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
             # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
-            cursor = connection.cursor()
+            # cursor = connection.cursor()
             
-            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
-            return redirect('home')  
+            # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
+            # return redirect('home')  
     else:
         form = CustomUserCreationForm()
 
     context = {'users': users, 'form': form}
 
     return render(request, 'home_admin.html', context)
+
+
+def update_active(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'toggle_role_apply':
+            # user = Users.objects.get(pk=user_id)
+            # user.RoleID = request.POST
+            selected_users = request.POST.getlist('selected_users')
+            print("Попадание в функцию")
+            print(request.POST)
+            print(selected_users)
+            # Попадание в функцию
+            # <QueryDict: {'csrfmiddlewaretoken': ['GFIEa33cLtVd9JKjWlltQ9ygHTxTnMVyg7ICMBFiAx1fSh8kZcAepkGmqMCUUzkP'],
+            #  'editEmail': [''], 'editFirstName': [''], 'editLastName': [''],
+            #  'editOffice': [''], 'editRole': ['Administrator'], 'action': ['toggle_role_apply']}>
+            # user.save()
+
+           
+        elif action == 'enable_disable_login':
+            selected_users = request.POST.getlist('selected_users')
+            for user_id in selected_users:
+                user = Users.objects.get(pk=user_id)
+                user.Active = not user.Active  # Инвертируем значение Active (1 -> 0, 0 -> 1)
+                user.save()
+        
+        return redirect('home_admin')  
+    return render(request, 'home_admin.html') 
+

@@ -1,84 +1,154 @@
-{% extends 'base.html' %}
+    {% extends 'base.html' %}
 
-{% block content %}
-    <h1>Home page admin</h1>
-    <hr>
-
-    <a href="#addUserModal">Add user</a>
-    <a href="{% url 'logout' %}">Exit</a>
-    <hr>
-    <select id="office-select">
-        <option value="0">All offices</option>
-        <option value="0">All offices</option>
-        <option value="1">Abu dhabi</option>
-        <option value="3">Cairo</option>
-        <option value="4">Bahrain</option>
-        <option value="5">Doha</option>
-        <option value="6">Riyadh</option>
-    </select>
-
-    <hr>
-
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>LastName</th>
-                <th>Age</th>
-                <th>User Role</th>
-                <th>Email Address</th>
-                <th>Office</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
-                <tr>
-                    <td>{{ user.FirstName }}</td>
-                    <td>{{ user.LastName }}</td>
-                    <td>{{ user.calculate_age }}</td>
-                    <td>{{ user.RoleID.Title }}</td>
-                    <td>{{ user.Email }}</td>
-                    <td>{{ user.OfficeID.Title }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <br>
-
-    <button id="button1">Change Role</button>
-    <button id="button2">Enable/Disable Login</button>
-
-    <!-- Модальное окно для добавления пользователя -->
-    <div id="addUserModal" class="modal">
-        <div class="modal-content">
-        <span class="close" id="closeModal">&times;</span>
-        <h2>Add user</h2>
-        {% if form.errors %}
-            <p>{{form.errors.error}}</p>
-        {% endif %}
-        <form action="{% url 'home_admin' %}" method="post">
-            {{form}}
-            {% csrf_token %}
-            <button type="submit">Save</button>
-            <button>Cancel</button>
-        </form>
-        </div>
-    </div>
-
-    <script>
-        document.getElementById('office-select').addEventListener('change', function() {
-            var selectedOffice = this.value;
-            window.location.href = '?office=' + selectedOffice;
-        });
-        document.querySelector('a[href="#addUserModal"]').addEventListener('click', function() {
-        document.getElementById('addUserModal').style.display = 'block';
-        });
-
-        // Закрыть модальное окно
-        document.getElementById('closeModal').addEventListener('click', function() {
-        document.getElementById('addUserModal').style.display = 'none';
-        });
-    </script>
+    {% block content %}
+        <h1>Home page admin</h1>
+        <hr>
     
-{% endblock %}
+        <a href="#addUserModal">Add user</a>
+        <a href="{% url 'logout' %}">Exit</a>
+        <hr>
+        <select id="office-select">
+            <option value="0">All offices</option>
+            <option value="0">All offices</option>
+            <option value="1">Abu dhabi</option>
+            <option value="3">Cairo</option>
+            <option value="4">Bahrain</option>
+            <option value="5">Doha</option>
+            <option value="6">Riyadh</option>
+        </select>
+    
+        <hr>
+        <form method="POST" action="{% url 'update_active' %}">
+        {% csrf_token %}
+            <table border="1" id="tableOfUsersAdminPage">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>LastName</th>
+                        <th>Age</th>
+                        <th>User Role</th>
+                        <th>Email Address</th>
+                        <th>Office</th>
+                    </tr>
+                </thead>
+                <tbody  id="tbodyAdminTableUsers">
+                    {% for user in users %}
+                    <tr 
+                        {% if user.Active == 0 %}style="background-color: #eb6565;"{% endif %}
+                        {% if user.RoleID.Title == "Administrator" %}style="background-color: #9cde8f;"{% endif %}
+                    >
+                            <td><input type="checkbox" class="user-checkbox" name="selected_users" value="{{ user.id }}"></td>
+                            <td>{{ user.FirstName }}</td>
+                            <td>{{ user.LastName }}</td>
+                            <td>{{ user.calculate_age }}</td>
+                            <td>{{ user.RoleID.Title }}</td>
+                            <td>{{ user.Email }}</td>
+                            <td>{{ user.OfficeID.Title }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    
+            
+            <button id="button2" name="action" value="enable_disable_login">Enable/Disable Login</button>
+        </form>
+            <button name="action" value="toggle_role" type="button" >Change Role</button>
+    
+    
+        <!-- Модальное окно для добавления пользователя -->
+        <div id="addUserModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeModal">&times;</span>
+                <h3>Add user</h3>
+                {% if form.errors %}
+                    <p>{{form.errors.error}}</p>
+                {% endif %}
+                <form action="{% url 'home_admin' %}" method="post">
+                    {{form}}
+                    {% csrf_token %}
+                    <button type="submit">Save</button>
+                    <button type="reset">Cancel</button>
+                </form>
+            </div>
+        </div>
+    
+    
+        <!-- Модальное окно -->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="closeMyModal close">&times;</span>
+                <p>User Name: <span id="userName"></span></p>
+    
+                <form id="editUserForm" method="POST" action="{% url 'update_active' %}">
+                    {% csrf_token %}
+                    <input type="text" id="editEmail" name="editEmail" placeholder="Email" >
+                    <input type="text" id="editFirstName" name="editFirstName" placeholder="First Name">
+                    <input type="text" id="editLastName" name="editLastName" placeholder="Last Name">
+                    <input type="text" id="editOffice" name="editOffice" placeholder="Last Name">
+                    <input type="text" id="editRole" name="editRole" placeholder="Role">
+    
+                    <button type="submit" name="action" value="toggle_role_apply" type="button">Apply</button>
+                </form>
+            </div>
+        </div>
+    
+
+
+        <script>
+            document.getElementById('office-select').addEventListener('change', function() {
+                var selectedOffice = this.value;
+                window.location.href = '?office=' + selectedOffice;
+            });
+            document.querySelector('a[href="#addUserModal"]').addEventListener('click', function() {
+                document.getElementById('addUserModal').style.display = 'block';
+            });
+    
+            // Закрыть модальное окно
+            document.getElementById('closeModal').addEventListener('click', function() {
+                document.getElementById('addUserModal').style.display = 'none';
+            });
+    
+    
+    
+    
+            // Обработка кнопки "Change Role" и модальное окно
+            var changeRoleButton = document.querySelector("button[value='toggle_role']");
+            var modal = document.getElementById("myModal");
+    
+            // Получение всех чекбоксов пользователей
+            var userCheckboxes = document.querySelectorAll(".user-checkbox");
+    
+            // Обработчик для кнопки "Change Role"
+            changeRoleButton.addEventListener("click", function() {
+                // сколько чекбоксов выбрано
+                var selectedCount = 0;
+                var selectedUserName = "";
+    
+                userCheckboxes.forEach(function(checkbox) {
+                    if (checkbox.checked) {
+                        selectedCount++;
+                        // имя пользователя из соответствующей строки таблицы
+                        selectedUserName = checkbox.parentElement.parentElement.querySelector("td:nth-child(2)").textContent;
+                    }
+                });
+    
+                // Если выбран только один пользователь -> модальное окно
+                if (selectedCount === 1) {
+                    document.getElementById("userName").textContent = selectedUserName;
+                    // document.getElementById("editRole")
+                    modal.style.display = "block";
+                } else {
+                    // В противном случае -> сообщение об ошибке
+                    alert("Please select one user.");
+                }
+            });
+    
+            // Обработчик для закрытия модального окна
+            var closeButton = document.querySelector(".closeMyModal");
+            closeButton.addEventListener("click", function() {
+                modal.style.display = "none";
+            });
+        </script>
+    
+        
+    {% endblock %}
