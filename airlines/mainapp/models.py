@@ -57,11 +57,11 @@ class Offices(models.Model):
 
 class Users(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True)
-    RoleID = models.ForeignKey(Roles, on_delete=models.CASCADE, db_column='RoleID')
+    RoleID = models.ForeignKey(Roles, on_delete=models.CASCADE, db_column='RoleID', default=0)
     Email = models.CharField(max_length=150, unique=True)
     FirstName = models.CharField(max_length=50, null=True)
     LastName = models.CharField(max_length=50)
-    OfficeID = models.ForeignKey(Offices, on_delete=models.CASCADE, null=True, db_column='OfficeID')
+    OfficeID = models.ForeignKey(Offices, on_delete=models.CASCADE, null=True, db_column='OfficeID', default=1)
     Birthdate = models.DateField(null=True)
     Active = models.SmallIntegerField(null=True)
 
@@ -82,8 +82,8 @@ class Users(AbstractBaseUser, PermissionsMixin):
 class Sessions(models.Model):
     id = models.AutoField(primary_key=True)
     user =  models.ForeignKey('Users',on_delete=models.CASCADE,related_name='user')
-    session_start = models.DateField()
-    last_confirmation = models.DateField(null=True)
+    session_start = models.DateTimeField()
+    last_confirmation = models.DateTimeField(null=True)
     error_status = models.CharField(max_length=50,default="Lost connection.",null=True)
-    session_end	 = models.DateField(null=True) 
+    session_end	 = models.DateTimeField(null=True) 
     status = models.CharField(null=True,max_length=1) 

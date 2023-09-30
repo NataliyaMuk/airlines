@@ -9,6 +9,9 @@ from .models import Sessions
 from django.db import connection, transaction
 from .decorators import admin_required
 from .models import Users
+import json
+from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login
 
 
 
@@ -33,14 +36,16 @@ from .models import Users
 #     return render(request, 'registration/register.html', {'form': form})
 
 
-def user_session(request):
-    if request.method == 'POST':
-        status = request.POST['status']
-        email = request.POST['email']
-        if status == 1 :
-            cursor = connection.cursor()
-            cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= NOW() JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = %s and  mainapp_sessions.status = `0`')",[email])
-
+def user_session(request,email):
+    cursor = connection.cursor()
+    # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),'Connection lost.',0)")
+    # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= '04041900' JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
+    if request.method == 'GET':
+        # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= NOW() JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
+        cursor = connection.cursor()
+        # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),%s,0)",[email])
+        cursor.execute("UPDATE mainapp_sessions SET status='1' WHERE status='0' and TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120")
+        cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE mainapp_sessions.status='0' and (SELECT id FROM mainapp_users WHERE email = %s) = user_id",[email])
 
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
@@ -62,6 +67,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def login_redirect(request):
+
+    cursor = connection.cursor()       
+    if cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s and status='0'",[request.user.id]) != "NULL":
+        cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE user_id = %s",[request.user.id])
+    cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120 and status='0'")
+    cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[request.user.id])
+
     if request.user.RoleID.Title == "Administrator":  
         return redirect('home_admin')
     else:
@@ -69,6 +81,12 @@ def login_redirect(request):
 
 
 def user_home(request):
+    # user = Users.objects.get(username="John")
+    # user = authenticate(username="John")
+    # login(request, user)
+    # user.password = 123
+    # user.save
+    # Users.objects.create_user(password='123', is_superuser=1, id=1, Email="j.doe@amonic.com", FirstName="John", LastName="Doe", Birthdate="1983-01-13", Active=1, email="f")
     # Логика для главной страницы обычных пользователей
     return render(request, 'home_user.html')
 
@@ -133,3 +151,8 @@ def update_active(request):
         return redirect('home_admin')  
     return render(request, 'home_admin.html') 
 
+def logout_redirect(request):
+    cursor = connection.cursor()
+    cursor.execute("UPDATE mainapp_sessions SET session_end=NOW(),status='1',error_status=NULL WHERE mainapp_sessions.status='0' and user_id = %s",[request.user.id])
+    logout(request)
+    return redirect('home')

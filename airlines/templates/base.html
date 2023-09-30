@@ -23,12 +23,9 @@
 </body>
 </html>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
 <script>
-    import axios from "axios";
-    while (true){
-        setTimeout(1000*5);
-        console.log(document.getElementById('user').textContent)
-        axios.post('http://127.0.0.1:8000/user-session/', {"status": 1,"email":document.getElementById('user').textContent})
-    }
-
+    dac = document.getElementById('user').textContent
+    setInterval(()=>{axios.get(`http://127.0.0.1:8000/user-session/${dac.slice(19)}`)} , 60000);
 </script>
+
