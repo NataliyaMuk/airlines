@@ -8,32 +8,10 @@ import datetime
 from .models import Sessions
 from django.db import connection, transaction
 from .decorators import admin_required
-from .models import Users
+from .models import Users, Roles
 import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
-
-
-
-# def register(request):
-#     if request.method == 'POST':
-#         form = CustomUserCreationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             # Логиним пользователя после успешной регистрации
-            
-#             login(request, user)
-
-#             # инициируем сессию пользователя
-#             # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
-#             # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
-#             cursor = connection.cursor()
-            
-#             cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
-#             return redirect('home')  
-#     else:
-#         form = CustomUserCreationForm()
-#     return render(request, 'registration/register.html', {'form': form})
 
 
 def user_session(request,email):
@@ -64,9 +42,18 @@ class CustomLoginView(LoginView):
     # сursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
 
 from django.contrib.auth.decorators import login_required
+from axes.utils import reset
 
 @login_required
 def login_redirect(request):
+
+    # user = authenticate(request, username=username, password=password)
+    user = request.user.Email
+    print(user)
+
+    # Сброс блокировки для данного пользователя(неудачных попыток)
+    reset(username=user)
+
 
     cursor = connection.cursor()       
     if cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s and status='0'",[request.user.id]) != "NULL":
@@ -100,21 +87,11 @@ def admin_home(request):
     else:
         users = Users.objects.all()
 
-# ЛОГИКА РЕГИСТРАЦИИ ТЕПЕРЬ ТУТ!!!! ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ НОВЫХ ЮЗЕРОВ
+# добавление новых пользователей
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-
-            # СЕССИЯ ПОСЛЕ ДОБАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯ НЕ НУЖНА ТЕПЕРЬ!!!!!!!!!!!!!!!!!
-
-            # инициируем сессию пользователя
-            # Sessions.objects.raw("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,1,NOW(),'Connection lost.')")
-            # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`) VALUES (NULL,%s,NOW(),'Connection lost.')", [user.id])
-            # cursor = connection.cursor()
-            
-            # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id])
-            # return redirect('home')  
+            form.save() 
     else:
         form = CustomUserCreationForm()
 
@@ -128,19 +105,20 @@ def update_active(request):
         action = request.POST.get('action')
 
         if action == 'toggle_role_apply':
-            # user = Users.objects.get(pk=user_id)
-            # user.RoleID = request.POST
-            selected_users = request.POST.getlist('selected_users')
-            print("Попадание в функцию")
-            print(request.POST)
-            print(selected_users)
-            # Попадание в функцию
-            # <QueryDict: {'csrfmiddlewaretoken': ['GFIEa33cLtVd9JKjWlltQ9ygHTxTnMVyg7ICMBFiAx1fSh8kZcAepkGmqMCUUzkP'],
-            #  'editEmail': [''], 'editFirstName': [''], 'editLastName': [''],
-            #  'editOffice': [''], 'editRole': ['Administrator'], 'action': ['toggle_role_apply']}>
-            # user.save()
+            
+            valueOfRole = request.POST.get('editRole')
+            role = Roles.objects.get(Title=valueOfRole)
 
-           
+            user_id = request.POST.get('userID')
+            user_id = int(user_id)
+            user = Users.objects.get(pk=user_id)
+            print(user_id)
+
+            user.RoleID = role
+            print(request.POST)
+            user.save()
+
+
         elif action == 'enable_disable_login':
             selected_users = request.POST.getlist('selected_users')
             for user_id in selected_users:
@@ -150,6 +128,7 @@ def update_active(request):
         
         return redirect('home_admin')  
     return render(request, 'home_admin.html') 
+
 
 def logout_redirect(request):
     cursor = connection.cursor()

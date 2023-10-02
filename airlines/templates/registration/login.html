@@ -1,16 +1,25 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/login.css' %}">{% endblock style %}
+
 {% block content %}
-    <h1>Login</h1>
-    <hr>
+    <div class="content">
+        <h1 class="login__header">Login</h1>
 
-    {% if form.errors %}
-        <p>{{form.errors.error}}</p>
-    {% endif %}
-
-    <form action="{% url 'login' %}" method="post">
-        {{form}}
-        {% csrf_token %}
-        <button type="submit">Login</button>
-    </form>
+        <hr size="2.5" color="black">
+    
+        <img class="login__logo" src="{% static 'mainapp/img/logo.png' %}" alt="logo">
+    
+        {% if form.errors %}
+            <p>{{form.errors.error}}</p> 
+        {% endif %}
+    
+        <form action="{% url 'login' %}" method="post">
+            {{form}}
+            {% csrf_token %}
+            <button class="login__btn" type="submit">Login</button>
+        </form>    
+    </div>
 {% endblock %}

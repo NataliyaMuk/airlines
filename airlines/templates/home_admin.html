@@ -1,73 +1,96 @@
     {% extends 'base.html' %}
 
+    {% load static %}
+
+    {% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/home-admin.css' %}">{% endblock style %}
+
+
     {% block content %}
-        <h1>Home page admin</h1>
-        <hr>
-    
-        <a href="#addUserModal">Add user</a>
-        <a href="http://localhost:8000/logout_redirect/">Exit</a>
-        <hr>
-        <select id="office-select">
-            <option value="0">All offices</option>
-            <option value="0">All offices</option>
-            <option value="1">Abu dhabi</option>
-            <option value="3">Cairo</option>
-            <option value="4">Bahrain</option>
-            <option value="5">Doha</option>
-            <option value="6">Riyadh</option>
-        </select>
-    
-        <hr>
-        <form method="POST" action="{% url 'update_active' %}">
-        {% csrf_token %}
-            <table border="1" id="tableOfUsersAdminPage">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>LastName</th>
-                        <th>Age</th>
-                        <th>User Role</th>
-                        <th>Email Address</th>
-                        <th>Office</th>
-                    </tr>
-                </thead>
-                <tbody  id="tbodyAdminTableUsers">
-                    {% for user in users %}
-                    <tr 
-                        {% if user.Active == 0 %}style="background-color: #eb6565;"{% endif %}
-                        {% if user.RoleID.Title == "Administrator" %}style="background-color: #9cde8f;"{% endif %}
-                    >
-                            <td><input type="checkbox" class="user-checkbox" name="selected_users" value="{{ user.id }}"></td>
-                            <td>{{ user.FirstName }}</td>
-                            <td>{{ user.LastName }}</td>
-                            <td>{{ user.calculate_age }}</td>
-                            <td>{{ user.RoleID.Title }}</td>
-                            <td>{{ user.Email }}</td>
-                            <td>{{ user.OfficeID.Title }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-    
+        <div class="content">
+            <h1 class="admin-home__heading">AMONIC Airlines Automation System</h1>
             
-            <button id="button2" name="action" value="enable_disable_login">Enable/Disable Login</button>
-        </form>
-            <button name="action" value="toggle_role" type="button" >Change Role</button>
+            <hr size="2.5" color="black">
+        
+            <a class="admin-home__heading-link" href="#addUserModal">Add user</a>
+            <a class="admin-home__heading-link" href="http://localhost:8000/logout_redirect/">Exit</a>
+            
+            <hr size="2.5" color="black">
+
+            <div class="admin-home__select-office">
+                <p class="admin-home__office-text">Office: </p>
+
+                <select id="office-select">
+                    <option value="0" class="visual-none">All offices</option>
+                    <option value="0" >All offices</option>
+                    <option value="1">Abu dhabi</option>
+                    <option value="3">Cairo</option>
+                    <option value="4">Bahrain</option>
+                    <option value="5">Doha</option>
+                    <option value="6">Riyadh</option>
+                </select>
+            </div>
+        
+
+            <form method="POST" action="{% url 'update_active' %}">
+            {% csrf_token %}
+                <table class="admin-home__table" border="1" id="tableOfUsersAdminPage">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>Name</th>
+                            <th>LastName</th>
+                            <th>Age</th>
+                            <th>User Role</th>
+                            <th>Email Address</th>
+                            <th>Office</th>
+                        </tr>
+                    </thead>
+                    <tbody  id="tbodyAdminTableUsers">
+                        {% for user in users %}
+                        <tr 
+                            {% if user.Active == 0 %}style="background-color: #eb6565;"{% endif %}
+                            {% if user.RoleID.Title == "Administrator" %}style="background-color: #9cde8f;"{% endif %}
+                        >
+                                <td><input type="checkbox" class="user-checkbox" name="selected_users" value="{{ user.id }}">{{ user.id }}</td>
+
+                                <td>{{ user.FirstName }}</td>
+                                <td>{{ user.LastName }}</td>
+                                <td>{{ user.calculate_age }}</td>
+                                <td>{{ user.RoleID.Title }}</td>
+                                <td>{{ user.Email }}</td>
+                                <td>{{ user.OfficeID.Title }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        
+                
+                <button class="enable-disable-login-btn" id="button2" name="action" value="enable_disable_login">Enable/Disable Login</button>
+                
+            </form>
+                <button  class="change-role-btn" name="action" value="toggle_role" >Change Role</button>
+        </div>
+        
+            
     
     
         <!-- Модальное окно для добавления пользователя -->
         <div id="addUserModal" class="modal">
             <div class="modal-content">
                 <span class="close" id="closeModal">&times;</span>
-                <h3>Add user</h3>
+                <h3 class="admin-home__heading">Add user</h3>
+                <hr>
                 {% if form.errors %}
                     <p>{{form.errors.error}}</p>
                 {% endif %}
                 <form action="{% url 'home_admin' %}" method="post">
                     {{form}}
                     {% csrf_token %}
-                    <button type="submit">Save</button>
-                    <button type="reset">Cancel</button>
+                    <div class="btn-container">
+                        <button class="btn" type="submit">Save</button>
+                        <button class="btn" type="reset">Cancel</button>
+                    </div>
+
                 </form>
             </div>
         </div>
@@ -81,13 +104,17 @@
     
                 <form id="editUserForm" method="POST" action="{% url 'update_active' %}">
                     {% csrf_token %}
-                    <input type="text" id="editEmail" name="editEmail" placeholder="Email" >
-                    <input type="text" id="editFirstName" name="editFirstName" placeholder="First Name">
-                    <input type="text" id="editLastName" name="editLastName" placeholder="Last Name">
-                    <input type="text" id="editOffice" name="editOffice" placeholder="Last Name">
-                    <input type="text" id="editRole" name="editRole" placeholder="Role">
+                    <input class="hidden" id="userID" name="userID" type="text" value="">
+
+                    <!-- <input type="text" id="editRole" name="editRole" placeholder="Role"> -->
+
+                    <select id="editRole" name="editRole">
+                        <option disabled selected>Роль</option>
+                        <option value="Administrator">Администратор</option>
+                        <option value="User">Пользователь</option>
+                    </select>
     
-                    <button type="submit" name="action" value="toggle_role_apply" type="button">Apply</button>
+                    <button type="submit" name="action" value="toggle_role_apply">Apply</button>
                 </form>
             </div>
         </div>
@@ -123,14 +150,20 @@
                 // сколько чекбоксов выбрано
                 var selectedCount = 0;
                 var selectedUserName = "";
+                var selectedUserID = "";
+                var inputElement = document.getElementById('userID');
     
                 userCheckboxes.forEach(function(checkbox) {
                     if (checkbox.checked) {
                         selectedCount++;
                         // имя пользователя из соответствующей строки таблицы
                         selectedUserName = checkbox.parentElement.parentElement.querySelector("td:nth-child(2)").textContent;
+                        selectedUserID = checkbox.parentElement.parentElement.querySelector("td:nth-child(1)").textContent;
+                        inputElement.value = selectedUserID;
                     }
                 });
+
+
     
                 // Если выбран только один пользователь -> модальное окно
                 if (selectedCount === 1) {

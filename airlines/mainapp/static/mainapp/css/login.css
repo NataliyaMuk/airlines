@@ -1,0 +1,39 @@
+.login__header {
+    font-weight: 100;
+    font-size: medium;
+    margin-left: 10px;
+}
+
+.content {
+    border: 2px solid;
+    margin: 0 auto;
+    width: 500px;
+    padding-bottom: 30px;
+}
+
+.login__logo {
+    display: block;
+    margin: 0 auto;
+    margin-top: 30px;
+    margin-bottom: 40px;
+}
+
+label {
+    margin-left: 120px;
+}
+
+input {
+    display: block;
+    width: 250px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    border: 2px solid;
+}
+
+.login__btn {
+    background-color: white;
+    border: 2px solid;
+    width: 120px;
+    display: block;
+    margin: 0 auto;
+}

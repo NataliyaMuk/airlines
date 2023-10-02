@@ -6,6 +6,7 @@
     <title>Amonic</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    {% block style %}{% endblock style %}
 </head>
 <body class="container">
     <ul>
@@ -13,9 +14,9 @@
             User: {{user}}
         </li>
 
-        <li>
+        <!-- <li>
             <a href="{% url 'home' %}">Home</a>
-        </li>
+        </li> -->
     </ul>
 
     {% block content %}

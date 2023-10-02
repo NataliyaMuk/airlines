@@ -30,10 +30,13 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'mainapp.Users'
 
+# AUTHENTICATION_BACKENDS = [
+#     'axes.backends.AxesBackend',
+# ]
+
 LOGIN_REDIRECT_URL = 'login_redirect'
 
 LOGOUT_REDIRECT_URL = "/"
-
 
 # Application definition
 
@@ -46,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "mainapp.apps.MainappConfig",
     "corsheaders",
+    'axes',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +62,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
+
+#настройки для библиотеки для авторизации (блокировка после неуд попыток)
+AXES_FAILURE_LIMIT = 3  # Количество неудачных попыток входа
+AXES_COOLOFF_TIME = 10  # Время блокировки в секундах (10 секунд)
+AXES_LOCKOUT_TEMPLATE = 'registration/lockout.html'
+SILENCED_SYSTEM_CHECKS = ['axes.W003']
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

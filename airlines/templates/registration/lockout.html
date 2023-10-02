@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Пользователь заблокирован</title>
+    <meta http-equiv="refresh" content="10;url=/login/">
+    {% load static %}
+
+    {% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/lockout.css' %}">{% endblock style %}
+</head>
+<body>
+    <h1 class="lockout__heading">Вы ввели неправильные учетные данные 3 раза. Пожалуйста, подождите 10 секунд, прежде чем попробовать снова.</h1>
+
+    <p class="lockout__text">Таймер обратного отсчета</p>
+    <p class="lockout__timer" id="timer">10</p>
+
+    <script>
+        // Функция для обновления таймера
+        function updateTimer() {
+            var timerElement = document.getElementById("timer");
+            var seconds = parseInt(timerElement.textContent);
+
+            if (seconds > 0) {
+                seconds -= 1;
+                timerElement.textContent = seconds;
+                setTimeout(updateTimer, 1000); // Вызываем функцию через 1 секунду
+            } else {
+                timerElement.textContent = "Время вышло!";
+            }
+        }
+
+        // Запускаем таймер при загрузке страницы
+        updateTimer();
+    </script>
+</body>
+</html>

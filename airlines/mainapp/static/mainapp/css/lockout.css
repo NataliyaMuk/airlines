@@ -1,0 +1,17 @@
+.lockout__heading {
+    font-weight: 100;
+    font-size: larger;
+    text-align: center;
+}
+
+.lockout__text {
+    font-weight: 100;
+    font-size: medium;
+    text-align: center;
+}
+
+.lockout__timer {
+    font-weight: 300;
+    font-size:xx-large;
+    text-align: center;
+}
