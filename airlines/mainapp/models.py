@@ -87,3 +87,7 @@ class Sessions(models.Model):
     error_status = models.CharField(max_length=50,default="Lost connection.",null=True)
     session_end	 = models.DateTimeField(null=True) 
     status = models.CharField(null=True,max_length=1) 
+
+class AddedTables(models.Model):
+    id = models.AutoField(primary_key=True)
+    table_name = models.CharField(max_length=500) 

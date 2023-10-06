@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from .forms import CustomAuthenticationForm
+from .forms import AddFileForm
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.views import View
@@ -12,6 +13,8 @@ from .models import Users, Roles
 import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
+from django.views.decorators.csrf import csrf_exempt
+import csv
 
 
 def user_session(request,email):
@@ -49,7 +52,6 @@ def login_redirect(request):
 
     # user = authenticate(request, username=username, password=password)
     user = request.user.Email
-    print(user)
 
     # Сброс блокировки для данного пользователя(неудачных попыток)
     reset(username=user)
@@ -66,7 +68,52 @@ def login_redirect(request):
     else:
         return redirect('home_user')
 
+@admin_required
+def add_file_form(request):
+    if request.method == "POST":
+        form = AddFileForm(request.POST,request.FILES)
+        File = request.FILES["file"]
+        a = []
+        results = []
 
+        reader = csv.reader(File)
+        for row in File:
+        #     row[2] = str(row[2]) +":00"
+        #     if row[0] == 'ADD':
+        #         cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s)),%s,%s,%s)",[row[1],row[2],row[6],row[4],row[5],row[7],row[8],row[3]])
+        #     if row[0] == 'EDIT':
+        #         cursor.execute("UPDATE `schedules` SET `Confirmed`=0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s)) and FlightNumber = %s AND Date = $s AND Time = %s",[row[4],row[5],row[3],row[1],row[2]])
+        # return redirect('home_admin')
+            words = str(row).split(',')
+            words[0] = words[0][2:]
+            words[2] = str(words[2]) +":00"
+            words[7] = words[7][:3]
+            words[-1] = 'OK'
+            results.append(words)
+            a.append(row)
+        context = {'files': results , 'readers': [request.FILES["file"]]} 
+        return render(request, 'error_page.html', context) 
+    else:
+        form = AddFileForm()
+        return render(request, 'add_file_form.html',{'form':form})
+
+# @csrf_exempt
+# def upload_file(request):
+#     File = request.FILES['inp_file']
+#     # with open("C:\\Users\\Vlad\\Desktop\\python\\airlines\\Schedules_V12.csv", newline='') as File: 
+#     reader = csv.reader(File)
+#     cursor = connection.cursor()
+#     if not(reader):
+#         return redirect('home_admin')
+#     for row in reader:
+#         row[2] = row[2] +":00"
+#         if row[0] == 'ADD':
+#             cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s)),%s,%s,%s)",[row[1],row[2],row[6],row[4],row[5],row[7],row[8],row[3]])
+#         if row[0] == 'EDIT':
+#             cursor.execute("UPDATE `schedules` SET `Confirmed`=0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s)) and FlightNumber = %s AND Date = $s AND Time = %s",[row[4],row[5],row[3],row[1],row[2]])
+#     context = {'files': [File], 'readers': [reader]}
+#     return render(request, 'error_page.html', context)
+ 
 def user_home(request):
     # user = Users.objects.get(username="John")
     # user = authenticate(username="John")

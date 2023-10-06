@@ -28,3 +28,6 @@ class CustomAuthenticationForm(AuthenticationForm):
     class Meta:
         model = Users
         fields = ['Email', 'Password']
+
+class AddFileForm(forms.Form):
+    file = forms.FileField()
