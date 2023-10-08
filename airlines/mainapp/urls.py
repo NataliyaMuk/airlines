@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, add_file_form
+from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, add_file_form, manage_flights
 from django.views.generic import TemplateView
 from airlines import settings
 from django.conf.urls.static import static
@@ -16,6 +16,7 @@ urlpatterns = [
     path('home_user/', user_home, name='home_user'),
     path('login_redirect/', login_redirect, name='login_redirect'),
     path('update_active/', update_active, name='update_active'),
+    path('manage-flights/', manage_flights, name='manage-flights'),
 ]
 
 

@@ -9,7 +9,7 @@ import datetime
 from .models import Sessions
 from django.db import connection, transaction
 from .decorators import admin_required
-from .models import Users, Roles
+from .models import Users, Roles, Schedules
 import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
@@ -129,6 +129,7 @@ def user_home(request):
 def admin_home(request):
 
     selected_office = request.GET.get('office')
+
     if selected_office and selected_office != '0':
         users = Users.objects.filter(OfficeID=selected_office)
     else:
@@ -182,3 +183,28 @@ def logout_redirect(request):
     cursor.execute("UPDATE mainapp_sessions SET session_end=NOW(),status='1',error_status=NULL WHERE mainapp_sessions.status='0' and user_id = %s",[request.user.id])
     logout(request)
     return redirect('home')
+
+
+@login_required
+def manage_flights(request):
+    selected_departure = request.GET.get('departure')
+    selected_arrival = request.GET.get('arrival')
+
+    schedules = Schedules.objects.all()
+
+    if selected_departure and selected_departure != '0':
+        schedules = schedules.filter(RouteID__DepartureAirportID__ID=selected_departure)
+
+    if selected_arrival and selected_arrival != '0':
+        schedules = schedules.filter(RouteID__ArrivalAirportID__ID=selected_arrival)
+
+    if selected_arrival == '0' and selected_departure == '0':
+        schedules = Schedules.objects.all()
+
+    context = {'schedules': schedules}
+    return render(request, 'manage-flights.html', context) 
+
+
+
+
+

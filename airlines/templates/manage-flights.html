@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/manage-flights.css' %}">{% endblock style %}
+
+
+{% block content %}
+    <div class="content">
+        <h1 class="manage-flights__heading">Manage Flights Schedules</h1>
+        
+        <hr size="2.5" color="black">
+
+
+                <select id="departure-airport-select">
+                    <option value="0" class="visual-none">From</option>
+                    <option value="0" >From</option>
+                    {% for schedule in schedules %}
+                            <option value="{{ schedule.RouteID.DepartureAirportID.ID }}">{{ schedule.RouteID.DepartureAirportID.IATACode }}</option>
+                        </tr>
+                    {% endfor %}
+                </select>
+
+                <select id="arrival-airport-select">
+                    <option value="0" class="visual-none">To</option>
+                    <option value="0" >To</option>
+                    {% for schedule in schedules %}
+                            <option value="{{ schedule.RouteID.ArrivalAirportID.ID }}">{{ schedule.RouteID.ArrivalAirportID.IATACode }}</option>
+                        </tr>
+                    {% endfor %}
+                </select>
+
+
+            <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Flight number</th>
+                        <th>Aircraft</th>
+                        <th>Economy price</th>
+                        <th>Business price</th>
+                        <th>First class price</th>
+                    </tr>
+                </thead>
+                <tbody  id="tbodyAdminTableUsers">
+                    {% for schedule in schedules %}
+                    <!-- <tr 
+                        {% if user.Active == 0 %}style="background-color: #eb6565;"{% endif %}
+                        {% if user.RoleID.Title == "Administrator" %}style="background-color: #9cde8f;"{% endif %}
+                    > -->
+                            <td><input type="checkbox" class="user-checkbox" name="selected_users" value="{{ schedule.ID }}">{{ schedule.ID }}</td>
+
+                            <td>{{ schedule.Date }}</td>
+                            <td>{{ schedule.Time }}</td>
+                            <td>{{ schedule.RouteID.DepartureAirportID.IATACode }}</td>
+                            <td>{{ schedule.RouteID.ArrivalAirportID.IATACode }}</td>
+                            <td>{{ schedule.FlightNumber }}</td>
+                            <td>{{ schedule.AircraftID.Name}}</td>
+                            <td>{{ schedule.EconomyPrice}}</td>
+                            <td>{{ schedule.calculate_business_price}}</td>
+                            <td>{{ schedule.calculate_first_class_price}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    </div>
+    
+    
+
+
+    <script>
+        function applyFilters() {
+            var departureAirport = document.getElementById('departure-airport-select').value;
+            var arrivalAirport = document.getElementById('arrival-airport-select').value;
+    
+            var queryParams = [];
+    
+            if (departureAirport) {
+                queryParams.push('departure=' + departureAirport);
+            }
+    
+            if (arrivalAirport) {
+                queryParams.push('arrival=' + arrivalAirport);
+            }
+    
+            var queryString = queryParams.join('&');
+            var newURL = window.location.pathname + '?' + queryString;
+    
+            window.location.href = newURL;
+        }
+    
+        document.getElementById('departure-airport-select').addEventListener('change', applyFilters);
+        document.getElementById('arrival-airport-select').addEventListener('change', applyFilters);
+    </script>
+
+    
+{% endblock %}
