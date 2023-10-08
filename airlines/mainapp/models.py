@@ -1,6 +1,7 @@
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from datetime import datetime
+from datetime import datetime ,timezone
 
 
 class CustomUserManager(BaseUserManager):
@@ -23,24 +24,31 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self.create_user(email, password, **extra_fields)
-    
+
+
 class Countries(models.Model):
     id = models.AutoField(primary_key=True)
     Name = models.CharField(max_length=50)
+
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'countries'
+
     def __str__(self):
         return self.Name
+
 
 class Roles(models.Model):
     id = models.AutoField(primary_key=True)
     Title = models.CharField(max_length=50)
+
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'roles'
+
     def __str__(self):
         return self.Title
+
 
 class Offices(models.Model):
     id = models.AutoField(primary_key=True)
@@ -48,9 +56,11 @@ class Offices(models.Model):
     Title = models.CharField(max_length=50)
     Phone = models.CharField(max_length=50)
     Contact = models.CharField(max_length=250)
+
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'offices'
+
     def __str__(self):
         return self.Title
 
@@ -79,14 +89,16 @@ class Users(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.Email
 
+
 class Sessions(models.Model):
     id = models.AutoField(primary_key=True)
-    user =  models.ForeignKey('Users',on_delete=models.CASCADE,related_name='user')
+    user = models.ForeignKey('Users', on_delete=models.CASCADE, related_name='user')
     session_start = models.DateTimeField()
     last_confirmation = models.DateTimeField(null=True)
-    error_status = models.CharField(max_length=50,default="Lost connection.",null=True)
-    session_end	 = models.DateTimeField(null=True) 
-    status = models.CharField(null=True,max_length=1) 
+    error_status = models.CharField(max_length=50, default="Lost connection.", null=True)
+    session_end = models.DateTimeField(null=True)
+    status = models.CharField(null=True, max_length=1)
+
 
 class AddedTables(models.Model):
     id = models.AutoField(primary_key=True)

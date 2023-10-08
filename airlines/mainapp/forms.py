@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 from .models import Users, Roles, Offices
 
+
 class CustomUserCreationForm(UserCreationForm):
     RoleID = forms.ModelChoiceField(queryset=Roles.objects.filter(id=2), required=True)
     OfficeID = forms.ModelChoiceField(queryset=Offices.objects.all(), required=True)
@@ -23,7 +24,6 @@ class CustomAuthenticationForm(AuthenticationForm):
     #         raise forms.ValidationError(
     #             "Вы не можете войти, так как заблокированы админом."
     #         )
-        
 
     class Meta:
         model = Users

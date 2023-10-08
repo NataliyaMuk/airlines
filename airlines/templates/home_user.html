@@ -1,8 +1,37 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
     <h1>Home page</h1>
+    <head>
+    </head>
     <hr>
+
+    <body>
+        <p>Time spent on system: {{ time }}</p>
+        <p>Number of crashes: {{ crashes }}</p>
+        <table>
+        <thead>
+        <th>Date</th>
+        <th>Login time</th>
+        <th>Logout time</th>
+        <th>time on system</th>
+        <th>Unsuccessful logout reason</th>
+        </thead>
+            <tbody>
+                {% for user in data %}
+                     <tr{% if user.error_status != None %} style="background-color: #CC3434;"{% endif %}>
+                        <td>{{ user.date }}</td>
+                         <td>{{ user.session_start }}</td>
+                        <td>{{ user.last_confirmation }}</td>
+                        <td>{{ user.time_difference }}</td>
+                        <td>{{ user.error_status }}</td>
+
+                     </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
 
     
 {% endblock %}
