@@ -162,3 +162,7 @@ class Schedules(models.Model):
 
     def __str__(self):
         return self.ID
+
+class Files(models.Model):
+    id = models.AutoField(primary_key=True)
+    Title = models.CharField(max_length=50)

@@ -73,10 +73,17 @@ def add_file_form(request):
     if request.method == "POST":
         form = AddFileForm(request.POST,request.FILES)
         File = request.FILES["file"]
-        a = []
         results = []
+        cursor = connection.cursor()
 
         reader = csv.reader(File)
+        cursor.execute("SELECT `Title` FROM `mainapp_files` WHERE Title = %s",[str(File)])
+        requestresult=cursor.fetchall()
+        for (title) in requestresult:
+            # results.append(title[0])
+            # results.append('//////aaaa/////')
+            if str(File) == title[0]:
+                return redirect('home_admin')
         for row in File:
         #     row[2] = str(row[2]) +":00"
         #     if row[0] == 'ADD':
@@ -88,14 +95,31 @@ def add_file_form(request):
             words[0] = words[0][2:]
             words[2] = str(words[2]) +":00"
             words[7] = words[7][:3]
-            words[-1] = 'OK'
-            results.append(words)
-            a.append(row)
+            words[6] = int(float(words[6]))
+            if words[6] > 2:
+                words[6]=2
+
+            # if words[0] == 'ADD':
+            #     words[-1] = 1
+            #     cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s LIMIT 1) LIMIT 1),%s,%s,%s)",[words[1],words[2],int(float(words[6])),words[4],words[5],words[7],words[-1],words[3]])
+            # else:
+            #     words[-1] = 0
+            #     cursor.execute("UPDATE `schedules` SET `Confirmed`= 0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) LIMIT 1) and FlightNumber = %s AND Date = %s AND Time = %s",[words[4],words[5],words[3],words[1],words[2]])
+            # if words[0] == 'ADD':
+            #     words[-1] = 1
+            # else:
+            #     words[-1] = 0
+            # results.append(words)
+        # results.append('//////aaaa/////')
+        # results.append(cursor.execute("SELECT `Title` FROM `mainapp_files` WHERE Title = %s",['txt1']))
+        cursor.execute("INSERT INTO `mainapp_files`(`Title`) VALUES (%s)",[str(File)])
         context = {'files': results , 'readers': [request.FILES["file"]]} 
         return render(request, 'error_page.html', context) 
     else:
         form = AddFileForm()
         return render(request, 'add_file_form.html',{'form':form})
+
+# INSERT INTO `mainapp_files`(`Title`) VALUES (%s)
 
 # @csrf_exempt
 # def upload_file(request):
