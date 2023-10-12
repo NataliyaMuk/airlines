@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from .forms import CustomAuthenticationForm
-from .forms import AddFileForm
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.views import View
@@ -9,15 +8,14 @@ import datetime
 from .models import Sessions
 from django.db import connection, transaction
 from .decorators import admin_required
-from .models import Users, Roles, Schedules
+from .models import Users, Roles, Schedules, Airports
 import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
-from django.views.decorators.csrf import csrf_exempt
-import csv
+from django.db.models import F, ExpressionWrapper, fields
 
 
-def user_session(request,email):
+def user_session(request, email):
     cursor = connection.cursor()
     # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),'Connection lost.',0)")
     # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= '04041900' JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
@@ -25,18 +23,21 @@ def user_session(request,email):
         # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= NOW() JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
         cursor = connection.cursor()
         # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),%s,0)",[email])
-        cursor.execute("UPDATE mainapp_sessions SET status='1' WHERE status='0' and TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120")
-        cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE mainapp_sessions.status='0' and (SELECT id FROM mainapp_users WHERE email = %s) = user_id",[email])
+        cursor.execute(
+            "UPDATE mainapp_sessions SET status='1' WHERE status='0' and TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120")
+        cursor.execute(
+            "UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE mainapp_sessions.status='0' and (SELECT id FROM mainapp_users WHERE email = %s) = user_id",
+            [email])
+
 
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     authentication_form = CustomAuthenticationForm()
 
-
     # для логина
     # if  cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
     #     cursor.execute("UPDATE `mainapp_sessions` SET `status`= `1` WHERE user_id = %s and  status = `0`')",[user.id]) #закрываваем сессию с ошибкой.
-    #cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id] #начинаем новую сессию
+    # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id] #начинаем новую сессию
 
     # для разлогирования
     # cursor.execute("UPDATE `mainapp_sessions` SET `status`= `1`,`error_status`=NULL,`session_end`= NOW() WHERE user_id = %s and status = `0`')",[user.id])
@@ -44,90 +45,67 @@ class CustomLoginView(LoginView):
     # для вывода сессий по пользователею
     # сursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
 
+
 from django.contrib.auth.decorators import login_required
 from axes.utils import reset
 
+
 @login_required
 def login_redirect(request):
-
     # user = authenticate(request, username=username, password=password)
     user = request.user.Email
+    print(user)
 
     # Сброс блокировки для данного пользователя(неудачных попыток)
     reset(username=user)
+    cursor = connection.cursor()
+    if cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s and status='0'",
+                      [request.user.id]) != "NULL":
+        cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE user_id = %s", [request.user.id])
+    cursor.execute(
+        "UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120 and status='0'")
+    cursor.execute(
+        "INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",
+        [request.user.id])
 
-
-    cursor = connection.cursor()       
-    if cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s and status='0'",[request.user.id]) != "NULL":
-        cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE user_id = %s",[request.user.id])
-    cursor.execute("UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120 and status='0'")
-    cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[request.user.id])
-
-    if request.user.RoleID.Title == "Administrator":  
+    if request.user.RoleID.Title == "Administrator":
         return redirect('home_admin')
     else:
         return redirect('home_user')
 
-@admin_required
-def add_file_form(request):
-    if request.method == "POST":
-        form = AddFileForm(request.POST,request.FILES)
-        File = request.FILES["file"]
-        a = []
-        results = []
 
-        reader = csv.reader(File)
-        for row in File:
-        #     row[2] = str(row[2]) +":00"
-        #     if row[0] == 'ADD':
-        #         cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s)),%s,%s,%s)",[row[1],row[2],row[6],row[4],row[5],row[7],row[8],row[3]])
-        #     if row[0] == 'EDIT':
-        #         cursor.execute("UPDATE `schedules` SET `Confirmed`=0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s)) and FlightNumber = %s AND Date = $s AND Time = %s",[row[4],row[5],row[3],row[1],row[2]])
-        # return redirect('home_admin')
-            words = str(row).split(',')
-            words[0] = words[0][2:]
-            words[2] = str(words[2]) +":00"
-            words[7] = words[7][:3]
-            words[-1] = 'OK'
-            results.append(words)
-            a.append(row)
-        context = {'files': results , 'readers': [request.FILES["file"]]} 
-        return render(request, 'error_page.html', context) 
-    else:
-        form = AddFileForm()
-        return render(request, 'add_file_form.html',{'form':form})
-
-# @csrf_exempt
-# def upload_file(request):
-#     File = request.FILES['inp_file']
-#     # with open("C:\\Users\\Vlad\\Desktop\\python\\airlines\\Schedules_V12.csv", newline='') as File: 
-#     reader = csv.reader(File)
-#     cursor = connection.cursor()
-#     if not(reader):
-#         return redirect('home_admin')
-#     for row in reader:
-#         row[2] = row[2] +":00"
-#         if row[0] == 'ADD':
-#             cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s)),%s,%s,%s)",[row[1],row[2],row[6],row[4],row[5],row[7],row[8],row[3]])
-#         if row[0] == 'EDIT':
-#             cursor.execute("UPDATE `schedules` SET `Confirmed`=0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s)) and FlightNumber = %s AND Date = $s AND Time = %s",[row[4],row[5],row[3],row[1],row[2]])
-#     context = {'files': [File], 'readers': [reader]}
-#     return render(request, 'error_page.html', context)
- 
 def user_home(request):
-    # user = Users.objects.get(username="John")
-    # user = authenticate(username="John")
-    # login(request, user)
-    # user.password = 123
-    # user.save
-    # Users.objects.create_user(password='123', is_superuser=1, id=1, Email="j.doe@amonic.com", FirstName="John", LastName="Doe", Birthdate="1983-01-13", Active=1, email="f")
     # Логика для главной страницы обычных пользователей
-    return render(request, 'home_user.html')
+    info = Sessions.objects.filter(user=request.user.id).annotate(
+        time_difference=ExpressionWrapper(
+            F('last_confirmation') - F('session_start'),
+            output_field=fields.DurationField()
+        )
+        ,
+    ).values('last_confirmation', 'session_start', 'time_difference', 'error_status')
+    time = datetime.timedelta()
+    crashes = 0
+    for obj in info:
+        try:
+            obj['date'] = obj['last_confirmation'].date()
+            obj['last_confirmation'] = obj['last_confirmation'].time()
+        except AttributeError:
+            obj['date'] = obj['session_start'].date()
+            obj['last_confirmation'] = '-'
+        obj['session_start'] = obj['session_start'].time()
+        try:
+            time += obj['time_difference']
+        except TypeError:
+            time += datetime.timedelta()
+        if obj['error_status'] is not None:
+            crashes += 1
+
+    return render(request, 'home_user.html',
+                  context={'data': info, 'time': time, 'crashes': crashes})
 
 
-@admin_required #кастомный декоратор
+@admin_required  # кастомный декоратор
 def admin_home(request):
-
     selected_office = request.GET.get('office')
 
     if selected_office and selected_office != '0':
@@ -135,11 +113,11 @@ def admin_home(request):
     else:
         users = Users.objects.all()
 
-# добавление новых пользователей
+    # добавление новых пользователей
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save() 
+            form.save()
     else:
         form = CustomUserCreationForm()
 
@@ -153,7 +131,7 @@ def update_active(request):
         action = request.POST.get('action')
 
         if action == 'toggle_role_apply':
-            
+
             valueOfRole = request.POST.get('editRole')
             role = Roles.objects.get(Title=valueOfRole)
 
@@ -173,14 +151,16 @@ def update_active(request):
                 user = Users.objects.get(pk=user_id)
                 user.Active = not user.Active  # Инвертируем значение Active (1 -> 0, 0 -> 1)
                 user.save()
-        
-        return redirect('home_admin')  
-    return render(request, 'home_admin.html') 
+
+        return redirect('home_admin')
+    return render(request, 'home_admin.html')
 
 
 def logout_redirect(request):
     cursor = connection.cursor()
-    cursor.execute("UPDATE mainapp_sessions SET session_end=NOW(),status='1',error_status=NULL WHERE mainapp_sessions.status='0' and user_id = %s",[request.user.id])
+    cursor.execute(
+        "UPDATE mainapp_sessions SET session_end=NOW(),status='1',error_status=NULL WHERE mainapp_sessions.status='0' and user_id = %s",
+        [request.user.id])
     logout(request)
     return redirect('home')
 
@@ -189,6 +169,10 @@ def logout_redirect(request):
 def manage_flights(request):
     selected_departure = request.GET.get('departure')
     selected_arrival = request.GET.get('arrival')
+    selected_date = request.GET.get('date')
+    selected_flight_number = request.GET.get('flightnumber')
+    selected_sort = request.GET.get('sort')
+    
 
     schedules = Schedules.objects.all()
 
@@ -198,13 +182,40 @@ def manage_flights(request):
     if selected_arrival and selected_arrival != '0':
         schedules = schedules.filter(RouteID__ArrivalAirportID__ID=selected_arrival)
 
-    if selected_arrival == '0' and selected_departure == '0':
-        schedules = Schedules.objects.all()
+    if selected_date and selected_date != '0':
+        schedules = schedules.filter(Date=selected_date)
 
-    context = {'schedules': schedules}
+    if selected_flight_number and selected_flight_number != '0':
+        schedules = schedules.filter(FlightNumber=selected_flight_number)
+	
+
+    #сортировка
+    
+    if selected_sort and selected_sort == '1':
+        schedules = schedules.order_by("EconomyPrice")
+    if selected_sort and selected_sort == '2':
+        schedules = schedules.order_by("Confirmed")
+    else:
+        schedules = schedules.order_by("-Date", "Time")
+
+    airports = Airports.objects.all()
+
+    context = {'schedules': schedules, 'airports':airports}
     return render(request, 'manage-flights.html', context) 
 
 
 
+def update_confirmation(request):
+    if request.method == 'POST':
+        action = request.POST.get('action')
 
+        if action == 'cancel_flight':
+            selected_flights = request.POST.getlist('selected_flights')
+            for flight_id in selected_flights:
+                flight = Schedules.objects.get(pk=flight_id)
+                flight.Confirmed = not flight.Confirmed  # Инвертируем значение Active (1 -> 0, 0 -> 1)
+                flight.save()
+
+        return redirect('manage-flights')
+    return render(request, 'manage-flights.html') 
 

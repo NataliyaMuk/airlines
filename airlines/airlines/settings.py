@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "mainapp.apps.MainappConfig",
     "corsheaders",
     'axes',
+    'django_tables2',
 ]
 
 MIDDLEWARE = [

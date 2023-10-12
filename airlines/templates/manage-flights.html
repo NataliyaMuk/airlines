@@ -11,62 +11,97 @@
         
         <hr size="2.5" color="black">
 
+        <fieldset class="fieldset__filter">
+            <legend>Filter by</legend>
+        
+            <div class="filter__container">
+                <div class="filter__container__object">
+                    <select id="departure-airport-select">
+                        <option value="0" class="visual-none">From</option>
+                        <option value="0" >From</option>
+                        {% for airport in airports %}
+                                <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
+                            </tr>
+                        {% endfor %}
+                    </select>
+    
+                    <select id="arrival-airport-select">
+                        <option value="0" class="visual-none">To</option>
+                        <option value="0" >To</option>
+                        {% for airport in airports %}
+                                <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
+                            </tr>
+                        {% endfor %}
+                    </select>
+    
+                    
+                    <div class="select__or__input__container">
+                        <p class="text__without__padding_margin">Sort by</p>
+    
+                        <select id="sort-select">
+                            <option value="0" class="visual-none">DateTime</option>
+                            <option value="0" >DateTime</option>
+                            <option value="1">Economy Price</option>
+                            <option value="2">Confirmed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter__container__object">
+                    <div class="select__or__input__container">
+                        <p class="text__without__padding_margin">Outbound</p>
+                        <input type="date" id="date-select">
+                    </div>
+                    <div class="select__or__input__container">
+                        <p class="text__without__padding_margin">Flight number</p>
+                        <input type="number" id="flight-number-select" placeholder="flight number">
+                    </div>
 
-                <select id="departure-airport-select">
-                    <option value="0" class="visual-none">From</option>
-                    <option value="0" >From</option>
-                    {% for schedule in schedules %}
-                            <option value="{{ schedule.RouteID.DepartureAirportID.ID }}">{{ schedule.RouteID.DepartureAirportID.IATACode }}</option>
+                    <button id="changeTableData">Apply</button>
+                </div>
+            </div>
+        </fieldset>
+
+
+            <form method="POST" action="{% url 'update_confirmation' %}">
+                {% csrf_token %}
+                <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Flight number</th>
+                            <th>Aircraft</th>
+                            <th>Economy price</th>
+                            <th>Business price</th>
+                            <th>First class price</th>
                         </tr>
-                    {% endfor %}
-                </select>
+                    </thead>
+                    <tbody  id="tbodyAdminTableUsers">
+                        {% for schedule in schedules %}
+                        <tr 
+                            {% if schedule.Confirmed == 0 %}style="background-color: #eb6565;"{% endif %}
+                        >
+                                <td><input type="checkbox" class="flights_checkbox" name="selected_flights" value="{{ schedule.ID }}">{{ schedule.ID }}</td>
 
-                <select id="arrival-airport-select">
-                    <option value="0" class="visual-none">To</option>
-                    <option value="0" >To</option>
-                    {% for schedule in schedules %}
-                            <option value="{{ schedule.RouteID.ArrivalAirportID.ID }}">{{ schedule.RouteID.ArrivalAirportID.IATACode }}</option>
-                        </tr>
-                    {% endfor %}
-                </select>
+                                <td>{{ schedule.Date }}</td>
+                                <td>{{ schedule.Time }}</td>
+                                <td>{{ schedule.RouteID.DepartureAirportID.IATACode }}</td>
+                                <td>{{ schedule.RouteID.ArrivalAirportID.IATACode }}</td>
+                                <td>{{ schedule.FlightNumber }}</td>
+                                <td>{{ schedule.AircraftID.Name}}</td>
+                                <td>{{ schedule.EconomyPrice}}</td>
+                                <td>{{ schedule.calculate_business_price}}</td>
+                                <td>{{ schedule.calculate_first_class_price}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-
-            <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
-                <thead>
-                    <tr>
-                        <th>id</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Flight number</th>
-                        <th>Aircraft</th>
-                        <th>Economy price</th>
-                        <th>Business price</th>
-                        <th>First class price</th>
-                    </tr>
-                </thead>
-                <tbody  id="tbodyAdminTableUsers">
-                    {% for schedule in schedules %}
-                    <!-- <tr 
-                        {% if user.Active == 0 %}style="background-color: #eb6565;"{% endif %}
-                        {% if user.RoleID.Title == "Administrator" %}style="background-color: #9cde8f;"{% endif %}
-                    > -->
-                            <td><input type="checkbox" class="user-checkbox" name="selected_users" value="{{ schedule.ID }}">{{ schedule.ID }}</td>
-
-                            <td>{{ schedule.Date }}</td>
-                            <td>{{ schedule.Time }}</td>
-                            <td>{{ schedule.RouteID.DepartureAirportID.IATACode }}</td>
-                            <td>{{ schedule.RouteID.ArrivalAirportID.IATACode }}</td>
-                            <td>{{ schedule.FlightNumber }}</td>
-                            <td>{{ schedule.AircraftID.Name}}</td>
-                            <td>{{ schedule.EconomyPrice}}</td>
-                            <td>{{ schedule.calculate_business_price}}</td>
-                            <td>{{ schedule.calculate_first_class_price}}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                <button class="enable-disable-flight-btn" id="enable-disable-flight-btn" name="action" value="cancel_flight">Cancel Flight</button> 
+            </form>
     </div>
     
     
@@ -76,6 +111,9 @@
         function applyFilters() {
             var departureAirport = document.getElementById('departure-airport-select').value;
             var arrivalAirport = document.getElementById('arrival-airport-select').value;
+            var dateSelect = document.getElementById('date-select').value;
+            var FlightNumber = document.getElementById('flight-number-select').value;
+            var SortSelect = document.getElementById('sort-select').value;
     
             var queryParams = [];
     
@@ -86,15 +124,27 @@
             if (arrivalAirport) {
                 queryParams.push('arrival=' + arrivalAirport);
             }
+
+            if (dateSelect) {
+                queryParams.push('date=' + dateSelect);
+            }
+
+            if (FlightNumber) {
+                queryParams.push('flightnumber=' + FlightNumber);
+            }
+
+            if (SortSelect) {
+                queryParams.push('sort=' + SortSelect);
+            }
     
             var queryString = queryParams.join('&');
             var newURL = window.location.pathname + '?' + queryString;
     
             window.location.href = newURL;
         }
-    
-        document.getElementById('departure-airport-select').addEventListener('change', applyFilters);
-        document.getElementById('arrival-airport-select').addEventListener('change', applyFilters);
+
+        document.getElementById('changeTableData').addEventListener('click', applyFilters);
+
     </script>
 
     

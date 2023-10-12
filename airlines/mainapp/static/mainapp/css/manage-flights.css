@@ -4,6 +4,13 @@
     margin-left: 10px;
 }
 
+button {
+    background-color: white;
+    border: 1px solid;
+    width: 130px;
+    padding: 4px;
+}
+
 .content {
     border: 2px solid;
     margin: 0 auto;
@@ -33,91 +40,41 @@
     margin-bottom: 20px;
 }
 
-/* .enable-disable-login-btn {
-    margin-left: 10px;
-    margin-bottom: 10px;
-    background-color: white;
-    border: 2px solid;
-    width: 170px;
-    display: block;
-}
-
-.change-role-btn {
-    margin-left: 10px;
-    background-color: white;
-    border: 2px solid;
-    width: 120px;
-    display: block;
-} */
-
 .visual-none{
     display: none;
 }
 
-
-
-
-
-
-/* .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-  }
-  
-.modal-content {
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 400px;
-    position: relative;
-} */
-  
-/* .close {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.btn-container {
-    display: flex;
-    justify-content: space-evenly;
-    margin-top: 30px;
-}
-
-.btn {
-    background-color: white;
-    border: 1px solid;
-    width: 70px;
-    padding: 4px;
-} */
-
-/* .modal-content select {
-    margin-bottom: 15px;
-}
-
-.modal-content label {
-    display: inline-block; 
-    width: 150px;
-    /* text-align: right;  */
-    /* margin-left: 10px;
-    margin-right: 10px; 
-}
-
-.modal-content input {
-    display: inline-block; 
-    width: 200px; 
-    margin-bottom: 15px;
-} */ */
-
 .hidden {
     visibility: hidden;
+}
+
+.fieldset__filter {
+    margin: 0 auto;
+    width: 750px;
+    margin-bottom: 30px;
+}
+
+.filter__container__object {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.filter__container {
+    flex-direction: column;
+    display: flex;
+}
+
+.select__or__input__container {
+    display: inline-flex;
+}
+
+.text__without__padding_margin {
+    padding: 0px;
+    margin: 0px;
+    margin-right: 6px;
+}
+
+.enable-disable-flight-btn {
+    margin-left: 53px;
 }
