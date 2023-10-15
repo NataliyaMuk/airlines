@@ -68,7 +68,7 @@
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
   }
-  
+
 .modal-content {
     background-color: #fff;
     margin: 5% auto;
@@ -78,7 +78,7 @@
     max-width: 400px;
     position: relative;
 } */
-  
+
 /* .close {
     position: absolute;
     top: 0;
@@ -105,18 +105,20 @@
 }
 
 .modal-content label {
-    display: inline-block; 
+    display: inline-block;
     width: 150px;
     /* text-align: right;  */
     /* margin-left: 10px;
-    margin-right: 10px; 
+    margin-right: 10px;
 }
 
 .modal-content input {
-    display: inline-block; 
-    width: 200px; 
+    display: inline-block;
+    width: 200px;
     margin-bottom: 15px;
-} */ */
+} */
+
+
 
 .hidden {
     visibility: hidden;

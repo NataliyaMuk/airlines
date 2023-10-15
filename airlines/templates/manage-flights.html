@@ -30,7 +30,7 @@
                     {% endfor %}
                 </select>
 
-
+<form method="post">
             <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
                 <thead>
                     <tr>
@@ -52,9 +52,10 @@
                         {% if user.Active == 0 %}style="background-color: #eb6565;"{% endif %}
                         {% if user.RoleID.Title == "Administrator" %}style="background-color: #9cde8f;"{% endif %}
                     > -->
-                            <td><input type="checkbox" class="user-checkbox" name="selected_users" value="{{ schedule.ID }}">{{ schedule.ID }}</td>
-
-                            <td>{{ schedule.Date }}</td>
+                             <td>
+                    <input type="checkbox" class="user-checkbox" name="selected_users" value="{{ schedule.ID }}">
+                    {{ schedule.ID }}
+                            </td> <td>{{ schedule.Date }}</td>
                             <td>{{ schedule.Time }}</td>
                             <td>{{ schedule.RouteID.DepartureAirportID.IATACode }}</td>
                             <td>{{ schedule.RouteID.ArrivalAirportID.IATACode }}</td>
@@ -67,11 +68,40 @@
                     {% endfor %}
                 </tbody>
             </table>
+</form>
+    <button id="submit-btn">Edit Flight</button>
     </div>
-    
-    
+
+ <!-- Модальное окно -->
+    <<dialog>
+        <div id="EditModel" class="modal">
+        <div class="modal-content">
 
 
+
+    <form id="myForm" method="POST" action="{% url 'manage-flights' %}">
+      {% csrf_token %}
+      <input type="hidden" name="selectedId" id="selectedId">
+
+      <p>Departure From (IATACode): <span id="departureOutput"></span></p>
+      <p>Arrival To (IATACode): <span id="arrivalOutput"></span></p>
+
+      <label for="dateInput">Date:</label>
+      <input type="date" name="dateInput" id="dateInput" required><br>
+      <label for="timeInput">Time:</label>
+      <input type="time" name="timeInput" id="timeInput" required><br>
+      <label for="numberInput">Economy price:</label>
+      <input type="number" name="numberInput" id="numberInput" required><br>
+      <input type="submit" value="Update">
+    </form>
+  </div>
+</div>
+      <p>
+   			<button id="close">Close</button>
+  		</p>
+    </dialog>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function applyFilters() {
             var departureAirport = document.getElementById('departure-airport-select').value;
@@ -96,6 +126,40 @@
         document.getElementById('departure-airport-select').addEventListener('change', applyFilters);
         document.getElementById('arrival-airport-select').addEventListener('change', applyFilters);
     </script>
+<script>
+      var dialog = document.querySelector('dialog')
+      // выводим модальное окно
+      document.querySelector('#submit-btn').onclick = function () {
+
+        dialog.showModal()
+      }
+            // скрываем окно
+      document.querySelector('#close').onclick = function () {
+        dialog.close()
+      }
+    </script>
+
+<script>
+window.onload = function() {
+    let checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach((checkbox) => {
+        checkbox.addEventListener('input', (event) => {
+            let row = event.target.parentElement.parentElement;
+            if(event.target.checked) {
+                document.getElementById('selectedId').value = event.target.value;
+                document.getElementById('departureOutput').innerText = row.cells[3].innerText;
+                document.getElementById('arrivalOutput').innerText = row.cells[4].innerText;
+            }
+        });
+    });
+}
+
+function formatDate(dateString) {
+    let dateParts = dateString.split("/")  // if the date format is MM/DD/YYYY
+    return `${dateParts[2]}-${dateParts[0]}-${dateParts[1]}` //return YYYY-MM-DD
+}
+</script>
 
     
 {% endblock %}
+

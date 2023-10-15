@@ -1,3 +1,5 @@
+import csv
+from .forms import AddFileForm
 from django.shortcuts import render, redirect
 from .forms import CustomUserCreationForm
 from .forms import CustomAuthenticationForm
@@ -13,6 +15,8 @@ import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
 from django.db.models import F, ExpressionWrapper, fields
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 
 def user_session(request, email):
@@ -164,9 +168,24 @@ def logout_redirect(request):
     logout(request)
     return redirect('home')
 
-  
+
 @login_required
 def manage_flights(request):
+    if request.method == 'POST':
+        id = request.POST.get('selectedId')
+        date = datetime.datetime.strptime(request.POST.get('dateInput'), '%Y-%m-%d').date()
+        time = datetime.datetime.strptime(request.POST.get('timeInput'), '%H:%M').time()
+        economy_money = request.POST.get('numberInput')
+
+        flight = Schedules.objects.get(ID=id)
+        flight.Date = date
+        flight.Time = time
+        flight.EconomyPrice = economy_money
+        flight.save()
+        # Обработка полученных значений checkbox_values
+
+        # return JsonResponse({'status': 'success'})  # Ответ в формате JSON
+
     selected_departure = request.GET.get('departure')
     selected_arrival = request.GET.get('arrival')
 
@@ -182,5 +201,68 @@ def manage_flights(request):
         schedules = Schedules.objects.all()
 
     context = {'schedules': schedules}
-    return render(request, 'manage-flights.html', context) 
+    return render(request, 'manage-flights.html', context)
 
+
+@csrf_exempt
+def process_checkbox_values(request):
+    if request.method == 'POST':
+        checkbox_values = request.POST.getlist('checkbox_values')
+
+        # Обработка полученных значений checkbox_values
+
+        return JsonResponse({'status': 'success'})  # Ответ в формате JSON
+
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+@admin_required
+def add_file_form(request):
+    if request.method == "POST":
+        form = AddFileForm(request.POST, request.FILES)
+        File = request.FILES["file"]
+        results = []
+        cursor = connection.cursor()
+
+        reader = csv.reader(File)
+        cursor.execute("SELECT `Title` FROM `mainapp_files` WHERE Title = %s", [str(File)])
+        requestresult = cursor.fetchall()
+        for (title) in requestresult:
+            # results.append(title[0])
+            # results.append('//////aaaa/////')
+            if str(File) == title[0]:
+                return redirect('home_admin')
+        for row in File:
+            #     row[2] = str(row[2]) +":00"
+            #     if row[0] == 'ADD':
+            #         cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s)),%s,%s,%s)",[row[1],row[2],row[6],row[4],row[5],row[7],row[8],row[3]])
+            #     if row[0] == 'EDIT':
+            #         cursor.execute("UPDATE `schedules` SET `Confirmed`=0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s)) and FlightNumber = %s AND Date = $s AND Time = %s",[row[4],row[5],row[3],row[1],row[2]])
+            # return redirect('home_admin')
+            words = str(row).split(',')
+            words[0] = words[0][2:]
+            words[2] = str(words[2]) + ":00"
+            words[7] = words[7][:3]
+            words[6] = int(float(words[6]))
+            if words[6] > 2:
+                words[6] = 2
+
+            # if words[0] == 'ADD':
+            #     words[-1] = 1
+            #     cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s LIMIT 1) LIMIT 1),%s,%s,%s)",[words[1],words[2],int(float(words[6])),words[4],words[5],words[7],words[-1],words[3]])
+            # else:
+            #     words[-1] = 0
+            #     cursor.execute("UPDATE `schedules` SET `Confirmed`= 0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) LIMIT 1) and FlightNumber = %s AND Date = %s AND Time = %s",[words[4],words[5],words[3],words[1],words[2]])
+            # if words[0] == 'ADD':
+            #     words[-1] = 1
+            # else:
+            #     words[-1] = 0
+            # results.append(words)
+        # results.append('//////aaaa/////')
+        # results.append(cursor.execute("SELECT `Title` FROM `mainapp_files` WHERE Title = %s",['txt1']))
+        cursor.execute("INSERT INTO `mainapp_files`(`Title`) VALUES (%s)", [str(File)])
+        context = {'files': results, 'readers': [request.FILES["file"]]}
+        return render(request, 'error_page.html', context)
+    else:
+        form = AddFileForm()
+        return render(request, 'add_file_form.html', {'form': form})

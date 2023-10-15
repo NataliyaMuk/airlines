@@ -1,5 +1,4 @@
 from django.urls import path, include
-
 from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, add_file_form, manage_flights
 from django.views.generic import TemplateView
 from airlines import settings
@@ -7,7 +6,7 @@ from django.conf.urls.static import static
 from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
-# path('add_file_form/', add_file_form, name='add_file_form'),
+    path('add_file_form/', add_file_form, name='add_file_form'),
     # path('upload_file/', upload_file),
     path('logout_redirect/', logout_redirect),
     path('', TemplateView.as_view(template_name="home.html"), name='home'),
@@ -23,4 +22,3 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
