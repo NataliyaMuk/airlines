@@ -1,9 +1,9 @@
-
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from datetime import datetime
 import math
+
 from datetime import datetime ,timezone
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -103,72 +103,80 @@ class Sessions(models.Model):
 
 class AddedTables(models.Model):
     id = models.AutoField(primary_key=True)
-    table_name = models.CharField(max_length=500) 
+    table_name = models.CharField(max_length=500)
 
 
 class Aircrafts(models.Model):
-    ID = models.AutoField(primary_key=True)	
-    Name = models.CharField(max_length=50)	
-    MakeModel = models.CharField(max_length=10)	
-    TotalSeats = models.IntegerField(max_length=11)		
-    EconomySeats = models.IntegerField(max_length=11)	
-    BusinessSeats = models.IntegerField(max_length=11)	
+    ID = models.AutoField(primary_key=True)
+    Name = models.CharField(max_length=50)
+    MakeModel = models.CharField(max_length=10)
+    TotalSeats = models.IntegerField(max_length=11)
+    EconomySeats = models.IntegerField(max_length=11)
+    BusinessSeats = models.IntegerField(max_length=11)
 
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'aircrafts'
+
     def __str__(self):
         return self.Name
-    
+
+
 class Airports(models.Model):
     ID = models.AutoField(primary_key=True)
-    CountryID =  models.IntegerField(max_length=11)
+    CountryID = models.IntegerField(max_length=11)
     IATACode = models.CharField(max_length=3)
     Name = models.CharField(max_length=50, null=True)
 
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'airports'
+
     def __str__(self):
         return self.IATACode
-    
-class Routes(models.Model):  
+
+
+class Routes(models.Model):
     ID = models.AutoField(primary_key=True)
-    DepartureAirportID = models.ForeignKey(Airports, on_delete=models.CASCADE, db_column='DepartureAirportID', default=0, related_name='departure_routes')	
-    ArrivalAirportID = models.ForeignKey(Airports, on_delete=models.CASCADE, db_column='ArrivalAirportID', default=0, related_name='arrival_routes')		
-    Distance = models.IntegerField(max_length=11)	
+    DepartureAirportID = models.ForeignKey(Airports, on_delete=models.CASCADE, db_column='DepartureAirportID',
+                                           default=0, related_name='departure_routes')
+    ArrivalAirportID = models.ForeignKey(Airports, on_delete=models.CASCADE, db_column='ArrivalAirportID', default=0,
+                                         related_name='arrival_routes')
+    Distance = models.IntegerField(max_length=11)
     FlightTime = models.IntegerField(max_length=11)
 
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'routes'
+
     def __str__(self):
         return f"{self.DepartureAirportID} -> {self.ArrivalAirportID}"
 
 
 class Schedules(models.Model):
     ID = models.AutoField(primary_key=True)
-    Date = models.DateField()	
+    Date = models.DateField()
     Time = models.TimeField()
 
-    AircraftID = models.ForeignKey(Aircrafts, on_delete=models.CASCADE, db_column='AircraftID', default=0)	
+    AircraftID = models.ForeignKey(Aircrafts, on_delete=models.CASCADE, db_column='AircraftID', default=0)
     RouteID = models.ForeignKey(Routes, on_delete=models.CASCADE, db_column='RouteID', default=0)
 
     EconomyPrice = models.FloatField()
-    Confirmed = models.SmallIntegerField()	
-    FlightNumber = models.CharField(max_length=10, null=True)	
+    Confirmed = models.SmallIntegerField()
+    FlightNumber = models.CharField(max_length=10, null=True)
 
     # Метод для вычисления цены бизнес класса
     def calculate_business_price(self):
         econom_price = self.EconomyPrice
-        business_price = math.floor(econom_price + econom_price*0.35)
+        business_price = math.floor(econom_price + econom_price * 0.35)
         return business_price
-    
+
     def calculate_first_class_price(self):
         econom_price = self.EconomyPrice
-        first_class_price = math.floor((econom_price + econom_price*0.35) + (econom_price + econom_price*0.35)*0.3)
+        first_class_price = math.floor(
+            (econom_price + econom_price * 0.35) + (econom_price + econom_price * 0.35) * 0.3)
         return first_class_price
-    
+
     class Meta:
         managed = False  # Это указывает Django не создавать эту таблицу
         db_table = 'schedules'
