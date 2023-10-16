@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, manage_flights, update_confirmation
+from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, manage_flights, update_confirmation, search_flights
 from django.views.generic import TemplateView
 from airlines import settings
 from django.conf.urls.static import static
@@ -18,6 +18,7 @@ urlpatterns = [
     path('update_active/', update_active, name='update_active'),
     path('manage-flights/', manage_flights, name='manage-flights'),
     path('update_confirmation/', update_confirmation, name='update_confirmation'),
+    path('search-flights/', search_flights, name='search-flights'),
 ]
 
 

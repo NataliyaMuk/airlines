@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/search-flights.css' %}">{% endblock style %}
+
+
+{% block content %}
+    <div class="content">
+        <h1 class="search-flights__heading">Search for flights</h1>
+        
+        <hr size="2.5" color="black">
+
+        <fieldset class="fieldset__filter">
+            <legend>Search Parameters</legend>
+        
+            <div class="filter__container">
+                <div class="filter__container__object">
+                    <select id="departure-airport-select">
+                        <option value="0" class="visual-none">From</option>
+                        <option value="0" >From</option>
+                        {% for airport in airports %}
+                                <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
+                            </tr>
+                        {% endfor %}
+                    </select>
+    
+                    <select id="arrival-airport-select">
+                        <option value="0" class="visual-none">To</option>
+                        <option value="0" >To</option>
+                        {% for airport in airports %}
+                                <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
+                            </tr>
+                        {% endfor %}
+                    </select>
+    
+                    
+                    <div class="select__or__input__container">
+                        <p class="text__without__padding_margin">Cabin Type</p>
+    
+                        <select id="cabin-type-select">
+                            <option value="0" class="visual-none">Economy</option>
+                            <option value="0" >Economy</option>
+                            <option value="1">Business</option>
+                            <option value="2">First Class</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="filter__container__object">
+                    <div class="select__or__input__container">
+                        <input type="radio" id="pathChoice1" name="path" value="email" />
+                        <label for="pathChoice1">Return</label>
+
+                        <input type="radio" id="pathChoice2" name="path" value="phone" />
+                        <label for="pathChoice2">One way</label>
+                    </div>
+
+                    <div class="select__or__input__container">
+                        <p class="text__without__padding_margin">Outbound</p>
+                        <input type="date" id="date-select">
+                    </div>
+
+                    <div class="select__or__input__container">
+                        <p class="text__without__padding_margin">Return</p>
+                        <input type="date" id="date-return-select">
+                    </div>
+
+                    <button id="changeFlights">Apply</button>
+                </div>
+            </div>
+        </fieldset>
+
+
+
+        <div class="search-flights__title">
+            <h2 class="search-flights__heading">Outbound flight details:</h2>
+            <div>
+                <input type="checkbox" class="display_three_days_outbound_checkbox" name="display_three_days_outbound_checkbox" value="yes">
+                <p>Display three days before and after</p>
+            </div>
+        </div>
+
+                <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Flight number</th>
+                            <th>Cabin Price</th>
+                            <th>Number of stops</th>
+                        </tr>
+                    </thead>
+                    <tbody  id="tbodyAdminTableUsers">
+                        <!--<tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>-->
+                    </tbody>
+                </table>
+
+
+
+            <div class="search-flights__title">
+                <h2 class="search-flights__heading">Return flight details:</h2>
+                <div>
+                    <input type="checkbox" class="display_three_days_return_checkbox" name="display_three_days_return_checkbox" value="yes">
+                    <p>Display three days before and after</p>
+                </div>
+            </div>
+
+                <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Flight number</th>
+                            <th>Cabin Price</th>
+                            <th>Number of stops</th>
+                        </tr>
+                    </thead>
+                    <tbody  id="tbodyAdminTableUsers2">
+                        <!--<tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>-->
+                    </tbody>
+                </table>
+    </div>
+    
+    
+
+
+    <script>
+        function applyFilters() {
+            var departureAirport = document.getElementById('departure-airport-select').value;
+            var arrivalAirport = document.getElementById('arrival-airport-select').value;
+            var cabinType = document.getElementById('cabin-type-select').value;
+            
+            // переменная для радиокнопки еще
+
+            var dateSelect = document.getElementById('date-select').value;
+            var dateReturnSelect = document.getElementById('date-return-select').value;
+
+    
+            var queryParams = [];
+    
+            if (departureAirport) {
+                queryParams.push('departure=' + departureAirport);
+            }
+    
+            if (arrivalAirport) {
+                queryParams.push('arrival=' + arrivalAirport);
+            }
+
+            
+            if (cabinType) {
+                queryParams.push('cabin=' + cabinType);
+            }
+
+            if (dateSelect) {
+                queryParams.push('date=' + dateSelect);
+            }
+
+            if (dateReturnSelect) {
+                queryParams.push('datereturn=' + dateReturnSelect);
+            }
+
+
+    
+            var queryString = queryParams.join('&');
+            var newURL = window.location.pathname + '?' + queryString;
+    
+            window.location.href = newURL;
+        }
+
+        document.getElementById('changeFlights').addEventListener('click', applyFilters);
+
+    </script>
+
+    
+{% endblock %}

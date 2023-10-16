@@ -293,3 +293,8 @@ def update_confirmation(request):
         return redirect('manage-flights')
     return render(request, 'manage-flights.html') 
 
+def search_flights(request):
+    airports = Airports.objects.all()
+    context = {'airports':airports}
+    return render(request, 'search_flights.html', context) 
+
