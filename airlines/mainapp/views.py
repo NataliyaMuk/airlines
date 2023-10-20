@@ -331,17 +331,14 @@ def search_path(request):
     # 1)Сделать функцию для записи в древо(НУЖНО КАК-ТО ПОНЯТЬ КУДА ЗАПИСЫВАТЬ(КООРДИНАТЫ))
     # 2)Сделать функцию самого построения древа, которая на данные будет вызывать функцию заполнения
     # 3)Сделать функцию парса древа, которая будет понимать,что ветка тупиковая.
-    # 4)
     # 
 
 
 
     end_point = [6] #временная задана так переменная, потом получать из формы поста.
-    start_point = [] 
-    global all_points
+    start_point = [3] 
     global routes_tree
     routes_tree = []
-    all_points = [end_point]
 
     class flight_route: 
         def __init__(self,sql,points):
@@ -350,55 +347,91 @@ def search_path(request):
 
     cursor = connection.cursor()
     # "SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = 'DOH'));"
-    cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s);",[end_point]) #получение всех вылетов до нужной точки
+    cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s);",[end_point[0]]) #получение всех вылетов до нужной точки
     results = cursor.fetchall() #получаю запрос
     # здесь написать функцию для записи в древо!(не забыть ее вызвать первый раз вне функции построения древа)
     #ААААААААААААААААААААААААА!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!минус мозг!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #Приблизительный образ это объект flight_route,хранящий sql и массив такихже объектов, из которых в него можно прилететь
     all_flights = [] #все полеты
-    for result in results: #перебираю все стартовые расписания
-        flight_obj = flight_route(result,[]) #иничу базовые объекты расписания
-        all_flights.append(build_routes_tree(flight_obj)) #заполняю полеты, вызывая рекурсивную функцию
 
-
-    def build_routes_tree(flight_obj): #функция должна вернуть древо всех потенциальных маршрутов(придумать как удалить тупиковые ветви(или сделать это в функции парса))
+    def build_routes_tree(flight_obj,all_points): #функция должна вернуть древо всех потенциальных маршрутов(придумать как удалить тупиковые ветви(или сделать это в функции парса))
         all_ways=[] #тут я собираю массив всех маршрутов до точки
         # routes_tree.append(flight_route())
         cursor.execute("SELECT DepartureAirportID FROM routes WHERE id = %s",[flight_obj.sql[4]])
-        points = cursor.fetchall() #я получил все аэропорты из которых можно прилетить в исходный и это массив массивов из одного элемента
+        points_list = cursor.fetchall() #я получил все аэропорты из которых можно прилетить в исходный и это массив массивов из одного элемента
+        points = []
+        for point_list in points_list:
+            points.append(point_list[0])
         if not(points):
-            continue 
+            return [flight_route([False],[False,'1er'])]
         for point in points: #проверяю наличие таких аэропортов в точке вылета и что это не конечный аэропорт и заполняю аэропорты отправления
-            if point == start_point:
+            if point == start_point[0]:
+                cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s) and `Date` <= %s and IF(`Date` = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[point,flight_obj.sql[1],flight_obj.sql[1],flight_obj.sql[2]]) #подучать над ArrivalAirportID
+                ways = cursor.fetchall()
+                for way in ways: #перебераю все пути отправления , загоняю в объекты , а потом запихиваю в массив
+                    flight_obj = flight_route(way,[True])
+                    all_ways.append(flight_obj) #собираем все пути, которые потом будут лежать в объекте.
+                return all_ways
                 # cursor.execute("SELECT DepartureAirportID FROM routes WHERE id = %s",[result[4]])
                 #на этой строке запрос на получение всех расписаний, которые прилетают в этот аэропорт
                 #вызвать функцию build_routes_tree и передать в нее все расписания(учесть , что расписаний может и не быть)
-            else point in all_points:
+            if point in all_points:
                 points.remove(point)#если уже есть точка в списке , то мы ее удаляем и переходим к следующей точке
+                if points == []:
+                    return [flight_route([False],[False,'2er',all_points])]
                 continue
+            # return (point,all_points,all_points.append(flight_obj.sql[0]),points)
             all_points.append(point)
-            cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s and Date <= %s and IF(Date = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[point,flight_obj.sql[1],flight_obj.sql[1],flight_obj.sql[2]]) #Получаем все расписания , с учетом, что рейс прилетает в аэропорт раньше, чем отлетает до нужного
+            cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s) and `Date` <= %s and IF(`Date` = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[point,flight_obj.sql[1],flight_obj.sql[1],flight_obj.sql[2]]) #Получаем все расписания , с учетом, что рейс прилетает в аэропорт раньше, чем отлетает до нужного
             # ("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = %s)) and Date <= %s and IF(Date = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[result[4],result[1],result[1],]) сохранить на всякий
             ways = cursor.fetchall() #получаю все маршруты из данного аэропорта
+            if ways == ():
+                return [flight_route([False],[False,'3er',all_points])]
+            # return [point,"TTTT",flight_obj.sql]
             for way in ways: #перебераю все пути отправления , загоняю в объекты , а потом запихиваю в массив
-                flight_obj = flight_route(result,[])
+                flight_obj = flight_route(way,[])
+                flight_obj.points = build_routes_tree(flight_obj,all_points) #вызываем рекрсивно функцию для заполения массивов
                 all_ways.append(flight_obj) #собираем все пути, которые потом будут лежать в объекте.
-        routes_tree.append(points) #закидываем все пути, которые мы встретили
-        flight = flight_route(point,)
-            
-            
-        #тут будет логика для если аэропорт является нужным нам точкой вылета
+        
+        return all_ways
+
+    for result in results: #перебираю все стартовые расписания
+        flight_obj = flight_route(result,[]) #иничу базовые объекты расписания
+        flight_obj.points = build_routes_tree(flight_obj,[end_point[0]])
+        all_flights.append(flight_obj) #заполняю полеты, вызывая рекурсивную функцию (.points[0].points)
 
 
-        else: #продумать логику, когда остается только точка вылета!!!!!!!!!!!!
-            #логика закрытия ветки
-            continue #если путей нет ветка зыкрывается
-        return 
+    def parse_tree(flight):
+        schedules = []
+        for point in flight.points:
+            try:
+                if type(point) != type(False):
+                    if point.points[0] == True:
+                        schedules.append([flight.sql])
+                    if point.points[0] == False:
+                        schedules.append(["False"])
+                    return schedules
+            except:
+                schedules2 = parse_tree(point)
+                schedules3 = []
+                for schedule2 in schedules2:
+                    schedule2.append(point.sql)
+                    schedules3.append(schedule2)
+                schedules.extend(schedules3)
+        schedules.append(flight.sql)        
+        return schedules
+     
+    # Парсинг древа возвращает массив массивов все доступных вариантов.
+    shedules = []
+    for flight in all_flights:
+        shedules.extend(parse_tree(flight))
     
-    #Тут дальше логика парса древа и построения цепочек полетов после вызова функции построения древа.
-
-
-    context = {'files': results , 'readers':results2[0] } 
+            
+    # all_flights
+    # all_flights[0].points
+    # all_flights[0].points[0].points
+    # [all_flights[0].points[0].points[0]]
+    context = {'files': [all_flights[1].points[0].points[0].points] , 'readers':["readers"] } 
     return render(request, 'error_page.html', context) 
 
 # SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = 11)) and Date <= '2018-10-28' and IF(Date >= '2017-10-27',SEC_TO_TIME(Time+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= '17:00:00',1)
