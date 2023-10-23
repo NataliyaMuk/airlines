@@ -417,29 +417,41 @@ def search_path(request):
         # print("MDA",flight.sql,flight.points)
         # if flight.points == []:
         #     return [False]
-        if flight.points[0] == False:
-            return [[flight.sql[0]]]
-        # print("flight.points[0]",flight.points[0].points)
-        if flight.points[0] == True:
-            print("ИСТИННО ТРУШНО")
-            return [[flight.sql]] #schedules1
-        schedules2=[]
+       
+        schedules1=[]
         for point in flight.points:
+            schedules2 = []
+            # print("error point",point)
+            if point == False:
+                # print("ФОЛСА!",[flight.points])
+                return [[flight.sql[0]]]
+        # print("flight.points[0]",flight.points[0].points)
+            if point == True:
+                # print("ИСТИННО ТРУШНО")
+                # print(flight.sql)
+                return [[flight.sql]] #schedules1
             schedules2.extend(parse_tree(point,[]))
+            # print("schedules2",schedules2)
             # print("ПОШЕЛ СЛЕДУЮЩИЙ!")
             # print(schedules2)
+            print("schedules2",schedules2)
             for schedule2 in schedules2:
-                print("schedule2",schedule2)
+                # print("schedule2",schedule2)
                 schedule2=list(schedule2)
+
+                print("schedule2",schedule2)
                 schedule2.append(point.sql)
-                print("append",schedule2)
-        schedules1.extend(schedules2) #extend
+                print("schedule2_append",schedule2)
+                # print("append",schedule2)
+                schedules1.append(schedule2) #extend
+            print("schedules1FFFF",schedules1)
         # print("schedules1")
         # print(schedules1)
         return schedules1
      
     # Парсинг древа возвращает массив массивов все доступных вариантов.
     shedules = []
+    print("EEEEEE!")
     for flight in all_flights:
         print("PARSING!")
         res = parse_tree(flight,[])
