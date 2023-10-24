@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 import math
 
 from datetime import datetime ,timezone
+# from django.db import migrations
 
 
 class CustomUserManager(BaseUserManager):
@@ -184,6 +185,43 @@ class Schedules(models.Model):
     def __str__(self):
         return self.ID
 
+
 class Files(models.Model):
     id = models.AutoField(primary_key=True)
     Title = models.CharField(max_length=50)
+
+
+class ReportMay(models.Model):
+    departure = models.CharField(max_length=10)
+    arrival = models.CharField(max_length=10)
+    age =  models.CharField(default=0, max_length=30)
+    gender = models.CharField(max_length=10)
+    cabintype = models.CharField(max_length=30)
+    q1 = models.IntegerField(default=0)
+    q2 = models.IntegerField(default=0)
+    q3 = models.IntegerField(default=0)
+    q4 = models.IntegerField(default=0)
+
+
+class ReportJune(models.Model):
+    departure = models.CharField(max_length=10)
+    arrival = models.CharField(max_length=10)
+    age =  models.CharField(default=0, max_length=30)
+    gender = models.CharField(max_length=10)
+    cabintype = models.CharField(max_length=30)
+    q1 = models.IntegerField(default=0)
+    q2 = models.IntegerField(default=0)
+    q3 = models.IntegerField(default=0)
+    q4 = models.IntegerField(default=0)
+
+
+class ReportJuly(models.Model):
+    departure = models.CharField(max_length=10)
+    arrival = models.CharField(max_length=10)
+    age =  models.CharField(default=0, max_length=30)
+    gender = models.CharField(max_length=10)
+    cabintype = models.CharField(max_length=30)
+    q1 = models.IntegerField(default=0)
+    q2 = models.IntegerField(default=0)
+    q3 = models.IntegerField(default=0)
+    q4 = models.IntegerField(default=0)

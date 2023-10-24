@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/reports.css' %}">{% endblock style %}
+
+
+{% block content %}
+
+    <div  class="container__report">
+
+        <p class="report__heading">Flight Satisafaction Survey Reports</p>
+
+        <hr size="2.5" color="black">
+
+        <div>
+            <a href="{% url 'reports_summary' %}" class="link_with_margin">View Results Summary</a>
+            <a href="{% url 'reports_detailed' %}" class="link_with_margin">View Results Detailed</a>
+        </div>
+
+        <hr size="2.5" color="black">
+
+        <div>
+
+            <select id="month-select">
+                <option value="ReportMay" class="visual-none">May</option>
+                <option value="ReportMay" >May</option>
+                <option value="ReportJune">June</option>
+                <option value="ReportJuly">July</option>
+            </select>
+
+
+            <table id="table1" class="reports__table">
+                <tr>
+                  <th>Grade</th>
+                  <th>Gender</th>
+                  <th>Age</th>
+                  <th>Cabin Type</th>
+                  <th>Destination Airport</th> 
+                </tr>
+    
+                <tr>
+
+                  <td>
+                        <table class="table__text__content">
+
+                          <tr>
+                            <td class="td-none">
+                                |
+                              </td>
+                          </tr>
+
+                          <tr class="question">
+                            <td>Plese rate out aircraft flown on AMONIC Airlines</td>
+                          </tr>
+    
+                          <tr>
+                              <td>Outstanding</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Very Good</td>
+                          </tr>
+
+                          <tr>
+                            <td>Good</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Adequate</td>
+                          </tr>
+
+                          
+                          <tr>
+                            <td>Needs Improvement</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Poor</td>
+                          </tr>
+
+                          <tr>
+                            <td>Dont know</td>
+                          </tr>
+
+                          <tr class="question">
+                            <td>How would you rate our flight attendants</td>
+                          </tr>
+    
+                          <tr>
+                              <td>Outstanding</td>
+                          </tr>
+
+                          <tr  style="background-color: #d5e3e9">
+                            <td>Very Good</td>
+                          </tr>
+
+                          <tr>
+                            <td>Good</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Adequate</td>
+                          </tr>
+
+                          
+                          <tr>
+                            <td>Needs Improvement</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Poor</td>
+                          </tr>
+
+                          <tr>
+                            <td>Dont know</td>
+                          </tr>
+
+                          <tr class="question">
+                            <td>How would you rate our inflight entertaiment</td>
+                          </tr>
+    
+                          <tr>
+                              <td>Outstanding</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Very Good</td>
+                          </tr>
+
+                          <tr>
+                            <td>Good</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Adequate</td>
+                          </tr>
+
+                          
+                          <tr>
+                            <td>Needs Improvement</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Poor</td>
+                          </tr>
+
+                          <tr>
+                            <td>Dont know</td>
+                          </tr>
+
+                          <tr class="question">
+                            <td>Please rate the tisket price for the trip you are talking</td>
+                          </tr>
+    
+                          <tr>
+                              <td>Outstanding</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Very Good</td>
+                          </tr>
+
+                          <tr>
+                            <td>Good</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Adequate</td>
+                          </tr>
+
+                          
+                          <tr>
+                            <td>Needs Improvement</td>
+                          </tr>
+
+                          <tr style="background-color: #d5e3e9">
+                            <td>Poor</td>
+                          </tr>
+
+                          <tr>
+                            <td>Dont know</td>
+                          </tr>
+
+                        </table>
+                  </td>
+
+                  <td>
+                    <table>
+                      <tr>
+                        <td>Total</td>
+                        <td>Male</td>
+                        <td>Female</td>
+                      </tr>
+
+                      <td class="td-none">
+                        |
+                      </td>
+                    
+                      {% for anwertype in dict_of_question_data_1 %}
+                        <tr >
+                            <td>{{ anwertype.count_total }}</td>
+                            <td>{{ anwertype.count_male }}</td>
+                            <td>{{ anwertype.count_female }}</td>
+                        </tr>
+                      {% endfor %}
+                      
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_2 %}
+                      <tr>
+                          <td>{{ anwertype.count_total }}</td>
+                          <td>{{ anwertype.count_male }}</td>
+                          <td>{{ anwertype.count_female }}</td>
+                      </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_3 %}
+                      <tr>
+                          <td>{{ anwertype.count_total }}</td>
+                          <td>{{ anwertype.count_male }}</td>
+                          <td>{{ anwertype.count_female }}</td>
+                      </tr>
+                      {% endfor %}
+
+                      
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_4 %}
+                      <tr>
+                          <td>{{ anwertype.count_total }}</td>
+                          <td>{{ anwertype.count_male }}</td>
+                          <td>{{ anwertype.count_female }}</td>
+                      </tr>
+                      {% endfor %}
+
+                    </table>
+                  </td>
+    
+                  <td >
+                    <table>
+                      <tr>
+                        <td>18-24</td>
+                        <td>25-39</td>
+                        <td>40-59</td>
+                        <td>60+</td>
+                      </tr>
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_1 %}
+                        <tr>
+                            <td>{{ anwertype.count_age18_24 }}</td>
+                            <td>{{ anwertype.count_female }}</td>
+                            <td>{{anwertype.count_age40_59}}</td>
+                            <td>{{anwertype.count_age60}}</td>
+                        </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_2 %}
+                      <tr>
+                          <td>{{ anwertype.count_age18_24 }}</td>
+                          <td>{{ anwertype.count_female }}</td>
+                          <td>{{anwertype.count_age40_59}}</td>
+                          <td>{{anwertype.count_age60}}</td>
+                      </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_3 %}
+                      <tr>
+                          <td>{{ anwertype.count_age18_24 }}</td>
+                          <td>{{ anwertype.count_female }}</td>
+                          <td>{{anwertype.count_age40_59}}</td>
+                          <td>{{anwertype.count_age60}}</td>
+                      </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_4 %}
+                      <tr>
+                          <td>{{ anwertype.count_age18_24 }}</td>
+                          <td>{{ anwertype.count_female }}</td>
+                          <td>{{anwertype.count_age40_59}}</td>
+                          <td>{{anwertype.count_age60}}</td>
+                      </tr>
+                      {% endfor %}
+
+
+                    </table>
+                  </td>
+    
+                  <td >
+                    <table>
+                      <tr>
+                        <td>Economy</td>
+                        <td>Business</td>
+                        <td>First</td>
+                      </tr>
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_1 %}
+                        <tr>
+                            <td>{{anwertype.count_economy}}</td>
+                            <td>{{anwertype.count_business}}</td>
+                            <td>{{anwertype.count_first}}</td>
+                        </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_2 %}
+                        <tr>
+                            <td>{{anwertype.count_economy}}</td>
+                            <td>{{anwertype.count_business}}</td>
+                            <td>{{anwertype.count_first}}</td>
+                        </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_3 %}
+                        <tr>
+                            <td>{{anwertype.count_economy}}</td>
+                            <td>{{anwertype.count_business}}</td>
+                            <td>{{anwertype.count_first}}</td>
+                        </tr>
+                      {% endfor %}
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                      {% for anwertype in dict_of_question_data_4 %}
+                        <tr>
+                            <td>{{anwertype.count_economy}}</td>
+                            <td>{{anwertype.count_business}}</td>
+                            <td>{{anwertype.count_first}}</td>
+                        </tr>
+                      {% endfor %}
+                    </table>
+                  </td>
+    
+                  <td >
+                    <table>
+                      <tr>
+                        <td>AUH</td>
+                        <td>BAH</td>
+                        <td>DOH</td>
+                        <td>RYU</td>
+                        <td>CAI</td>
+                      </tr>
+
+                      <td class="td-none">
+                        |
+                      </td>
+
+                        {% for anwertype in dict_of_question_data_1 %}
+                            <tr>
+                                <td>{{anwertype.count_auh}}</td>
+                                <td>{{anwertype.count_bah}}</td>
+                                <td>{{anwertype.count_doh}}</td>
+                                <td>{{anwertype.count_ryu}}</td>
+                                <td>{{anwertype.count_cai}}</td>
+                            </tr>
+                        {% endfor %}
+
+                        <td class="td-none">
+                            |
+                        </td>
+
+                        {% for anwertype in dict_of_question_data_2 %}
+                            <tr>
+                                <td>{{anwertype.count_auh}}</td>
+                                <td>{{anwertype.count_bah}}</td>
+                                <td>{{anwertype.count_doh}}</td>
+                                <td>{{anwertype.count_ryu}}</td>
+                                <td>{{anwertype.count_cai}}</td>
+                            </tr>
+                        {% endfor %}
+
+                        <td class="td-none">
+                            |
+                        </td>
+
+                        {% for anwertype in dict_of_question_data_3 %}
+                            <tr>
+                                <td>{{anwertype.count_auh}}</td>
+                                <td>{{anwertype.count_bah}}</td>
+                                <td>{{anwertype.count_doh}}</td>
+                                <td>{{anwertype.count_ryu}}</td>
+                                <td>{{anwertype.count_cai}}</td>
+                            </tr>
+                        {% endfor %}
+
+                        <td class="td-none">
+                            |
+                        </td>
+
+                        {% for anwertype in dict_of_question_data_1 %}
+                            <tr>
+                                <td>{{anwertype.count_auh}}</td>
+                                <td>{{anwertype.count_bah}}</td>
+                                <td>{{anwertype.count_doh}}</td>
+                                <td>{{anwertype.count_ryu}}</td>
+                                <td>{{anwertype.count_cai}}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                  </td>
+                </tr>
+            </table>
+
+
+
+
+            <select id="gender-select">
+                <option value="M" class="visual-none">Gender</option>
+                <option value="M" >Men</option>
+                <option value="F">Women</option>
+            </select>
+
+            <select id="age-select">
+                <option value="18" class="visual-none">18-24</option>
+                <option value="18">18-24</option>
+                <option value="25" >25-39</option>
+                <option value="40">40-59</option>
+                <option value="60">60+</option>
+            </select>
+        </div>
+    </div>
+
+
+
+    <script>
+        function applyFilters() {
+            var MonthSelect = document.getElementById('month-select').value;
+            var AgeSelect = document.getElementById('age-select').value;
+            var GenderSelect = document.getElementById('gender-select').value;
+    
+            var queryParams = [];
+
+            if (MonthSelect) {
+                queryParams.push('month=' + MonthSelect);
+            }
+
+            if (AgeSelect) {
+                queryParams.push('age=' + AgeSelect);
+            }
+
+            if (GenderSelect) {
+                queryParams.push('gender=' + GenderSelect);
+            }
+    
+            var queryString = queryParams.join('&');
+            var newURL = window.location.pathname + '?' + queryString;
+    
+            window.location.href = newURL;
+        }
+
+        document.getElementById('month-select').addEventListener('change', applyFilters);
+        document.getElementById('age-select').addEventListener('change', applyFilters);
+        document.getElementById('gender-select').addEventListener('change', applyFilters);
+    </script>
+
+    
+{% endblock %}

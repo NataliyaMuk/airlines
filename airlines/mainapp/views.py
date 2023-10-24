@@ -10,16 +10,19 @@ import datetime
 from .models import Sessions
 from django.db import connection, transaction
 from .decorators import admin_required
-from .models import Users, Roles, Schedules, Airports
+from .models import Users, Roles, Schedules, Airports, ReportMay, ReportJune, ReportJuly
 import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
 from django.db.models import F, ExpressionWrapper, fields
-
-import csv
 from django.views.decorators.csrf import csrf_exempt
 
 from django.http import JsonResponse
+from django.conf import settings
+import os
+from django.db.models import Count
+
+from mainapp import models
 
 
 
@@ -324,6 +327,143 @@ def add_file_form(request):
         form = AddFileForm()
         return render(request, 'add_file_form.html', {'form': form})
 
+
+
+
+def view_reports_summary(request):
+    count_male = ReportMay.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male'] + ReportJune.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male'] + ReportJuly.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male']
+    count_female = ReportMay.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female'] + ReportJune.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female'] + ReportJuly.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female']
+    count_age18_24 = ReportMay.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24'] + ReportJune.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24'] + ReportJuly.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24']
+    count_age25_39 = ReportMay.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39'] + ReportJune.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39'] + ReportJuly.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39']
+    count_age40_59 = ReportMay.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59'] + ReportJune.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59'] + ReportJuly.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59']
+    count_age60 = ReportMay.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60'] + ReportJune.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60'] + ReportJuly.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60']
+    count_economy = ReportMay.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy'] + ReportJune.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy'] + ReportJuly.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy']
+    count_business = ReportMay.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business'] + ReportJune.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business'] + ReportJuly.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business']
+    count_first = ReportMay.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first'] + ReportJune.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first'] + ReportJuly.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first']
+    count_auh = ReportMay.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh'] + ReportJune.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh'] + ReportJuly.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh']
+    count_bah = ReportMay.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah'] + ReportJune.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah'] + ReportJuly.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah']
+    count_doh = ReportMay.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh'] + ReportJune.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh'] + ReportJuly.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh']
+    count_ryu = ReportMay.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu'] + ReportJune.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu'] + ReportJuly.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu']
+    count_cai = ReportMay.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai'] + ReportJune.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai'] + ReportJuly.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai']
+
+    context = {'count_male':count_male, 'count_female':count_female,  'count_age18_24':count_age18_24, 'count_age25_39':count_age25_39, 'count_age40_59':count_age40_59, 'count_age60':count_age60, 'count_economy':count_economy, 'count_business':count_business, 'count_first':count_first, 'count_auh':count_auh, 'count_bah':count_bah, 'count_doh':count_doh, 'count_ryu':count_ryu, 'count_cai':count_cai}                                                        
+
+    return render(request, 'reports_summary.html', context) 
+
+
+
+
+
+def question_search_data(question, model_name, selected_age, selected_gender):
+    dict_of_questions_data = {}
+
+
+    for i in range(1, 8): #оценка от 1 до 7
+
+        dict_of_answer = {}
+
+        if (selected_age):
+            if (selected_age == '18'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(count_total=Count(question))['count_total']
+            if (selected_age == '25'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(count_total=Count(question))['count_total']
+            if (selected_age == '40'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(count_total=Count(question))['count_total']
+            if (selected_age == '60'):  
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(count_total=Count(question))['count_total']
+
+        elif (selected_gender):
+            count_total = getattr(models, model_name).objects.filter(**{question: i}, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+       
+        elif (selected_gender and selected_age):
+            print(selected_age)
+            print(selected_gender)
+
+            if (selected_age == '18'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+            if (selected_age == '25'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+            if (selected_age == '40'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+            if (selected_age == '60'):  
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+
+        else: 
+            count_total = getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))['count_total']
+        # count_total = getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))['count_total']
+       
+        count_male = getattr(models, model_name).objects.filter(**{question: i}, gender="M").aggregate(count_male=Count("gender"))['count_male']
+        count_female = getattr(models, model_name).objects.filter(**{question: i}, gender="F").aggregate(count_female=Count("gender"))['count_female']
+        count_age18_24 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24']
+        count_age25_39 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39']
+        count_age40_59 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59']
+        count_age60 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(count_age60=Count('age'))['count_age60']
+        count_economy = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy']
+        count_business = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business']
+        count_first = getattr(models, model_name).objects.filter(**{question: i}, cabintype="First").aggregate(count_first=Count("cabintype"))['count_first']
+        count_auh = getattr(models, model_name).objects.filter(**{question: i}, arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh']
+        count_bah = getattr(models, model_name).objects.filter(**{question: i}, arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah']
+        count_doh = getattr(models, model_name).objects.filter(**{question: i}, arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh']
+        count_ryu = getattr(models, model_name).objects.filter(**{question: i}, arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu']
+        count_cai = getattr(models, model_name).objects.filter(**{question: i}, arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai']
+
+        # if (count_total):
+        if 'count_total' in locals():
+            dict_of_answer['count_total'] = count_total
+
+        dict_of_answer['count_male'] = count_male
+        dict_of_answer['count_female'] = count_female
+        dict_of_answer['count_age18_24'] = count_age18_24
+        dict_of_answer['count_age25_39'] = count_age25_39
+        dict_of_answer['count_age40_59'] = count_age40_59
+        dict_of_answer['count_age60'] = count_age60
+        dict_of_answer['count_economy'] = count_economy
+        dict_of_answer['count_business'] = count_business
+        dict_of_answer['count_first'] = count_first
+        dict_of_answer['count_auh'] = count_auh
+        dict_of_answer['count_bah'] = count_bah
+        dict_of_answer['count_doh'] = count_doh
+        dict_of_answer['count_ryu'] = count_ryu
+        dict_of_answer['count_cai'] = count_cai    
+
+        dict_of_questions_data[i] = dict_of_answer
+
+    return dict_of_questions_data
+    
+
+def view_reports_detailed(request):
+
+    selected_month = "ReportMay"
+
+    selected_age = '18'
+    selected_gender ='M'
+
+    if request.method == 'GET':
+        if (isinstance(request.GET.get('month'), str)): #является ли selected_month строкой
+            selected_month = request.GET.get('month')
+        if (isinstance(request.GET.get('age'), str)): #является ли selected_age строкой
+            selected_age = request.GET.get('age')
+        if (isinstance(request.GET.get('gender'), str)): #является ли selected_gender строкой
+            selected_gender = request.GET.get('gender')
+
+
+    dict_of_question_data_1 = question_search_data('q1', selected_month, selected_age, selected_gender)
+    dict_of_question_data_2 = question_search_data('q2', selected_month, selected_age, selected_gender)
+    dict_of_question_data_3 = question_search_data('q3', selected_month, selected_age, selected_gender)
+    dict_of_question_data_4 = question_search_data('q4', selected_month, selected_age, selected_gender)
+
+    context = {'dict_of_question_data_1':dict_of_question_data_1.values(), 'dict_of_question_data_2':dict_of_question_data_2.values(), 'dict_of_question_data_3':dict_of_question_data_3.values(), 'dict_of_question_data_4':dict_of_question_data_4.values()}
+
+    return render(request, 'reports_detailed.html', context)
+
+
+
+
+
+
+
+
+
 def search_path(request):
 
 
@@ -437,3 +577,4 @@ def search_path(request):
 # SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = 11)) and Date <= '2018-10-28' and IF(Date >= '2017-10-27',SEC_TO_TIME(Time+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= '17:00:00',1)
 
 # SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = 11)) and Date <= '2018-10-28' and IF(Date = '2017-10-27',SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= '24:00:00',1)
+

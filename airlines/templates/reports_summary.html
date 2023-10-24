@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/reports.css' %}">{% endblock style %}
+
+
+{% block content %}
+
+    <div class="container__report">
+
+        <p class="report__heading">Flight Satisafaction Survey Reports</p>
+
+        <hr size="2.5" color="black">
+
+        <div>
+            <a href="{% url 'reports_summary' %}" class="link_with_margin">View Results Summary</a>
+            <a href="{% url 'reports_detailed' %}" class="link_with_margin">View Results Detailed</a>
+        </div>
+
+        <hr size="2.5" color="black">
+
+
+        <table id="table1" class="reports__table">
+            <tr>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Cabin Type</th>
+              <th>Destination Airport</th>
+            </tr>
+
+            <tr>
+              <td >
+                <table>
+                  <tr>
+                    <td>Male</td>
+                    <td>Female</td>
+                  </tr>
+
+                  <tr>
+                    <td>{{count_male}}</td>
+                    <td>{{count_female}}</td>
+                  </tr>
+                </table>
+              </td>
+
+              <td >
+                <table>
+                  <tr>
+                    <td>18-24</td>
+                    <td>25-39</td>
+                    <td>40-59</td>
+                    <td>60+</td>
+                  </tr>
+
+                  <tr>
+                    <td>{{count_age18_24}}</td>
+                    <td>{{count_age25_39}}</td>
+                    <td>{{count_age40_59}}</td>
+                    <td>{{count_age60}}</td>
+                  </tr>
+                </table>
+              </td>
+
+              <td >
+                <table>
+                  <tr>
+                    <td>Economy</td>
+                    <td>Business</td>
+                    <td>First</td>
+                  </tr>
+
+                  <tr>
+                    <td>{{count_economy}}</td>
+                    <td>{{count_business}}</td>
+                    <td>{{count_first}}</td>
+                  </tr>
+                </table>
+              </td>
+
+              <td >
+                <table>
+                  <tr>
+                    <td>AUH</td>
+                    <td>BAH</td>
+                    <td>DOH</td>
+                    <td>RYU</td>
+                    <td>CAI</td>
+                  </tr>
+
+                  <tr>
+                    <td>{{count_auh}}</td>
+                    <td>{{count_bah}}</td>
+                    <td>{{count_doh}}</td>
+                    <td>{{count_ryu}}</td>
+                    <td>{{count_cai}}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+    </div>
+
+    <script>
+
+    </script>
+
+    
+{% endblock %}
