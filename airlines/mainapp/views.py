@@ -15,6 +15,8 @@ import json
 from django.contrib.auth import logout
 from django.contrib.auth import authenticate, login
 from django.db.models import F, ExpressionWrapper, fields
+import datetime
+import time 
 
 import csv
 from django.views.decorators.csrf import csrf_exempt
@@ -25,12 +27,8 @@ from django.http import JsonResponse
 
 def user_session(request, email):
     cursor = connection.cursor()
-    # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),'Connection lost.',0)")
-    # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= '04041900' JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
     if request.method == 'GET':
-        # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= NOW() JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
         cursor = connection.cursor()
-        # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),%s,0)",[email])
         cursor.execute(
             "UPDATE mainapp_sessions SET status='1' WHERE status='0' and TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120")
         cursor.execute(
@@ -41,17 +39,6 @@ def user_session(request, email):
 class CustomLoginView(LoginView):
     template_name = 'registration/login.html'
     authentication_form = CustomAuthenticationForm()
-
-    # для логина
-    # if  cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
-    #     cursor.execute("UPDATE `mainapp_sessions` SET `status`= `1` WHERE user_id = %s and  status = `0`')",[user.id]) #закрываваем сессию с ошибкой.
-    # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",[user.id] #начинаем новую сессию
-
-    # для разлогирования
-    # cursor.execute("UPDATE `mainapp_sessions` SET `status`= `1`,`error_status`=NULL,`session_end`= NOW() WHERE user_id = %s and status = `0`')",[user.id])
-
-    # для вывода сессий по пользователею
-    # сursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s",[user.id])
 
 
 from django.contrib.auth.decorators import login_required
@@ -81,27 +68,6 @@ def login_redirect(request):
     else:
         return redirect('home_user')
     
-
-# INSERT INTO `mainapp_files`(`Title`) VALUES (%s)
-
-# @csrf_exempt
-# def upload_file(request):
-#     File = request.FILES['inp_file']
-#     # with open("C:\\Users\\Vlad\\Desktop\\python\\airlines\\Schedules_V12.csv", newline='') as File: 
-#     reader = csv.reader(File)
-#     cursor = connection.cursor()
-#     if not(reader):
-#         return redirect('home_admin')
-#     for row in reader:
-#         row[2] = row[2] +":00"
-#         if row[0] == 'ADD':
-#             cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s)),%s,%s,%s)",[row[1],row[2],row[6],row[4],row[5],row[7],row[8],row[3]])
-#         if row[0] == 'EDIT':
-#             cursor.execute("UPDATE `schedules` SET `Confirmed`=0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s)) and FlightNumber = %s AND Date = $s AND Time = %s",[row[4],row[5],row[3],row[1],row[2]])
-#     context = {'files': [File], 'readers': [reader]}
-#     return render(request, 'error_page.html', context)
-
-
 def user_home(request):
     # Логика для главной страницы обычных пользователей
     info = Sessions.objects.filter(user=request.user.id).annotate(
@@ -275,11 +241,6 @@ def update_confirmation(request):
     return render(request, 'manage-flights.html') 
 
 
-def search_flights(request):
-    airports = Airports.objects.all()
-    context = {'airports':airports}
-    return render(request, 'search_flights.html', context) 
-
 
 @admin_required
 def add_file_form(request):
@@ -324,7 +285,8 @@ def add_file_form(request):
         form = AddFileForm()
         return render(request, 'add_file_form.html', {'form': form})
 
-def search_path(request):
+
+def search_path(request,end,start):
 
     # Этапы разработки:
     # 1)Сделать функцию для записи в древо(НУЖНО КАК-ТО ПОНЯТЬ КУДА ЗАПИСЫВАТЬ(КООРДИНАТЫ))
@@ -333,9 +295,12 @@ def search_path(request):
     # 
 
 
-
-    end_point = [6] #временная задана так переменная, потом получать из формы поста.
-    start_point = [4] 
+    if request.method == 'POST':
+        end_point = [end] #временная задана так переменная, потом получать из формы поста.
+        start_point = [start] 
+    else:
+        end_point = [6] #временная задана так переменная, потом получать из формы поста.
+        start_point = [4] 
     global routes_tree
     routes_tree = []
 
@@ -347,7 +312,9 @@ def search_path(request):
     cursor = connection.cursor()
     # "SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = 'DOH'));"
     cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s);",[end_point[0]]) #получение всех вылетов до нужной точки
+    
     results = cursor.fetchall() #получаю запрос
+    # print("results",len(results))
     # здесь написать функцию для записи в древо!(не забыть ее вызвать первый раз вне функции построения древа)
     #ААААААААААААААААААААААААА!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!минус мозг!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     #Приблизительный образ это объект flight_route,хранящий sql и массив такихже объектов, из которых в него можно прилететь
@@ -363,27 +330,17 @@ def search_path(request):
             points.append(point_list[0])
         # print("points",points,all_points)
         if not(points):
-            return [flight_route([False],[False])]
+            return [flight_route([False,"er1"],[False])]
+        # print("points",points,all_points)
         for point in points: #проверяю наличие таких аэропортов в точке вылета и что это не конечный аэропорт и заполняю аэропорты отправления
             if point == start_point[0]:
-                cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s) and `Date` <= %s and IF(`Date` = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[point,flight_obj[1],flight_obj[1],flight_obj[2]]) #подучать над ArrivalAirportID
-                ways = cursor.fetchall()
-                if ways == ():
-                    return [flight_route([False],[False])]
-                for way in ways: #перебераю все пути отправления , загоняю в объекты , а потом запихиваю в массив
-                    # print("TRUE!!!",start_point[0])
-                    # print("TRUE!!!",way)
-                    flight_obj1 = flight_route(way,[True])
-                    all_ways.append(flight_obj1) #собираем все пути, которые потом будут лежать в объекте.
-                
-                return all_ways
-                # cursor.execute("SELECT DepartureAirportID FROM routes WHERE id = %s",[result[4]])
-                #на этой строке запрос на получение всех расписаний, которые прилетают в этот аэропорт
-                #вызвать функцию build_routes_tree и передать в нее все расписания(учесть , что расписаний может и не быть)
+                return [flight_route([True],[True])]
+            # print("AFTER START POINT")
             if point in all_points:
                 points.remove(point)#если уже есть точка в списке , то мы ее удаляем и переходим к следующей точке
                 if points == []:
-                    return [flight_route([False],[False])]
+                    # all_points.append(point)
+                    return [flight_route([False,"er3"],[False])]
                 continue
             # return (point,all_points,all_points.append(flight_obj.sql[0]),points)
             all_points.append(point)
@@ -391,7 +348,7 @@ def search_path(request):
             # ("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = %s)) and Date <= %s and IF(Date = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[result[4],result[1],result[1],]) сохранить на всякий
             ways = cursor.fetchall() #получаю все маршруты из данного аэропорта
             if ways == ():
-                return [flight_route([False],[False])]
+                return [flight_route([False,"er4"],[False])]
             # return [point,"TTTT",flight_obj.sql]
 
             # print("////////////////////////")
@@ -410,6 +367,7 @@ def search_path(request):
         flight_obj = flight_route(result,[]) #иничу базовые объекты расписания
         flight_obj.points = build_routes_tree(flight_obj.sql,[])
         all_flights.append(flight_obj) #заполняю полеты, вызывая рекурсивную функцию (.points[0].points)
+    # print("all_flights",len(all_flights))
 
     def parse_tree(flight,schedules1):
         # print("points",flight.points)
@@ -429,35 +387,40 @@ def search_path(request):
             if point == True:
                 # print("ИСТИННО ТРУШНО")
                 # print(flight.sql)
-                return [[flight.sql]] #schedules1
+                return [[True]] #schedules1
             schedules2.extend(parse_tree(point,[]))
             # print("schedules2",schedules2)
             # print("ПОШЕЛ СЛЕДУЮЩИЙ!")
             # print(schedules2)
-            print("schedules2",schedules2)
+            # print("schedules2",schedules2)
             for schedule2 in schedules2:
                 # print("schedule2",schedule2)
                 schedule2=list(schedule2)
 
-                print("schedule2",schedule2)
+                # print("schedule2",schedule2)
                 schedule2.append(point.sql)
-                print("schedule2_append",schedule2)
+                # print("schedule2_append",schedule2)
                 # print("append",schedule2)
                 schedules1.append(schedule2) #extend
-            print("schedules1FFFF",schedules1)
+            # print("schedules1FFFF",schedules1)
         # print("schedules1")
         # print(schedules1)
         return schedules1
      
     # Парсинг древа возвращает массив массивов все доступных вариантов.
     shedules = []
-    print("EEEEEE!")
+    # print("EEEEEE!")
     for flight in all_flights:
-        print("PARSING!")
+        # print("flight.sql",flight.sql)
+        # print("PARSING!")
         res = parse_tree(flight,[])
-        print("res",res)
+        # print("res",res)
         if res == None:
             continue
+        res = list(res)
+        for i in range(len(res)-1):
+            # print("flight.sql",flight.sql)
+            res[i].append(flight.sql)
         shedules.extend(res)
         # print("shedules",shedules)
     # print("shedules",shedules)
@@ -467,9 +430,153 @@ def search_path(request):
     # all_flights[0].points[0].points
     # [all_flights[0].points[0].points[0]]
     # [all_flights[1].points[0].points[0].points]
+    if request.method == 'POST':
+        return shedules
+    else:
+        context = {'files': [shedules] , 'readers':["readers"] } 
+        return render(request, 'error_page.html', context) 
+
+@csrf_exempt
+def search_flights(request):
+    main_cursor = connection.cursor()
+    airports = Airports.objects.all()
+    if request.method == "POST":
+        # print("HOHOHO")
+        print("request.POST[display_three_days_outbound_checkbox]",request.POST.get('display_three_days_return_checkbox'))
+        all_ways = search_path(request,int(request.POST['arrival_airport']),int(request.POST['departure_airport']))
+        delta = datetime.timedelta(weeks = 0, days = 3, hours = 0, seconds = 0)
+        print("delta",type(delta))
+        # print(all_ways)
+        # print("LEN:",len(all_ways))
+
+        # print("str(request.POST['outbound'])",str(request.POST['outbound']))
+        # print(type(datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d')))
+
+        if str(request.POST.get('display_three_days_outbound_checkbox')) == "yes":
+            delta = datetime.timedelta(weeks = 0, days = 3, hours = 0, seconds = 0)
+            start_data_outbound = datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d') - delta
+            end_data_outbound = datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d') + delta
+        else:
+            data_outbound = request.POST['outbound']
+            print("data_outbound",data_outbound)
+        
+        if str(request.POST.get('display_three_days_return_checkbox')) == "yes":
+            delta = datetime.timedelta(weeks = 0, days = 3, hours = 0, seconds = 0)
+            start_data_return = datetime.datetime.strptime(request.POST['return'], '%Y-%m-%d') - delta
+            end_data_return = datetime.datetime.strptime(request.POST['return'], '%Y-%m-%d') + delta
+        else:
+            data_return = request.POST['return']
+            print("data_return",data_return)
+
+
+
+        paths_return = []
+        paths_outbound=[]
+
+
+        for ways in all_ways:
+            if ways[0] == True:
+                # ways = list(ways)
+                ways.pop(0)
+                ways.pop(0)
+                # print("ways[0][1] == data_outbound",str(ways[0][1]) == data_outbound,"ways[0][1]",ways[0][1],"data_outbound",data_outbound)
+                # print("type(ways[0][1])",type(ways[0][1]))
+                if str(request.POST.get('display_three_days_outbound_checkbox')) == "yes":
+                    # print("end_data.date",end_data.date())
+                    # print("ways[0][1] > end_data.date()",ways[0][1] > end_data.date())
+                    if ways[0][1] <= end_data_outbound.date() and ways[0][1] >= start_data_outbound.date():
+                        parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
+                        parsed_way = [[],0,[]]
+                        for way in ways:
+                            parsed_way[0].append(way[0])
+                            parsed_way[2].append(way[-1])
+                            # print("int(request.POST['fly_class']",request.POST['fly_class'])
+                            # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
+                            parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                            parsed_way[1] = round(parsed_way[1],1)
+                            print("parsed_way[1]",parsed_way[1])
+                        parsed_ways.extend(parsed_way)
+                        parsed_ways.append(len(ways))
+                        paths_outbound.append(parsed_ways)
+                    continue
+                if str(ways[0][1]) == data_outbound:
+                    parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
+                    parsed_way = [[],0,[]]
+                    for way in ways:
+                        parsed_way[0].append(way[0])
+                        parsed_way[2].append(way[-1])
+                        # print("int(request.POST['fly_class']",request.POST['fly_class'])
+                        # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
+                        parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                    parsed_ways.extend(parsed_way)
+                    parsed_ways.append(len(ways))
+                    paths_outbound.append(parsed_ways)
+
+            else:
+                continue
+        if paths_outbound == []:
+            paths_outbound.append("Маршрутов, удовлетворяющим вашим условиям не найдено.")
+        
+        if request.POST['return']:
+            all_ways = search_path(request,int(request.POST['departure_airport']),int(request.POST['arrival_airport']))
+            for ways in all_ways:
+                if ways[0] == True:
+                    # ways = list(ways)
+                    ways.pop(0)
+                    ways.pop(0)
+                    # print("type(ways[0][1])",type(ways[0][1]))
+                    if str(request.POST.get('display_three_days_return_checkbox')) == "yes":
+                        # print("display_three_days_return_checkbox")
+                        # print("end_data.date",end_data.date())
+                        # print("ways[0][1] > end_data.date()",ways[0][1] > end_data.date())
+                        if ways[0][1] <= end_data_return.date() and ways[0][1] >= start_data_return.date():
+                            parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
+                            parsed_way = [[],0,[]]
+                            for way in ways:
+                                # print("way[0]",way[0])
+                                print("way[0]",way[0])
+                                parsed_way[0].append(way[0])
+                                # print("way[-1]",way[7])
+                                print("way[7]",way[-1])
+                                parsed_way[2].append(way[7])
+                                # print("int(request.POST['fly_class']",request.POST['fly_class'])
+                                # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
+                                parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                            parsed_ways.extend(parsed_way)
+                            # print("parsed_ways]",parsed_ways)
+                            parsed_ways.append(len(ways))
+                            paths_return.append(parsed_ways)
+                        continue
+                    if str(ways[0][1]) == data_return:
+                        parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
+                        parsed_way = [[],0,[]]
+                        for way in ways:
+                            parsed_way[0].append(way[0])
+                            parsed_way[2].append(way[-1])
+                            # print("int(request.POST['fly_class']",request.POST['fly_class'])
+                            # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
+                            parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                        parsed_ways.extend(parsed_way)
+                        parsed_ways.append(len(ways))
+                        paths_return.append(parsed_ways)
+
+                else:
+                    continue
+            if paths_return == []:
+                paths_return.append("Маршрутов, удовлетворяющим вашим условиям не найдено.")
+        
+        
+        # print("paths_return:",paths_return)
+        # print("paths_outbound:",paths_outbound)
+        context = {'airports':airports,'paths_outbound':paths_outbound,"paths_return":paths_return} #'outbound_flight ':outbound_flight ,'return_flight ':return_flight 
+        return render(request, 'search_flights.html', context) 
+    else:
+        context = {'airports':airports}
+        return render(request, 'search_flights.html', context) 
+
+@admin_required
+def booking_confirmation(request):
+
     context = {'files': [shedules] , 'readers':["readers"] } 
     return render(request, 'error_page.html', context) 
 
-# SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = 11)) and Date <= '2018-10-28' and IF(Date >= '2017-10-27',SEC_TO_TIME(Time+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= '17:00:00',1)
-
-# SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = 11)) and Date <= '2018-10-28' and IF(Date = '2017-10-27',SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= '24:00:00',1)

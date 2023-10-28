@@ -10,68 +10,68 @@
         <h1 class="search-flights__heading">Search for flights</h1>
         
         <hr size="2.5" color="black">
-
-        <fieldset class="fieldset__filter">
-            <legend>Search Parameters</legend>
-        
-            <div class="filter__container">
-                <div class="filter__container__object">
-                    <select id="departure-airport-select">
-                        <option value="0" class="visual-none">From</option>
-                        <option value="0" >From</option>
-                        {% for airport in airports %}
-                                <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
-                            </tr>
-                        {% endfor %}
-                    </select>
-    
-                    <select id="arrival-airport-select">
-                        <option value="0" class="visual-none">To</option>
-                        <option value="0" >To</option>
-                        {% for airport in airports %}
-                                <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
-                            </tr>
-                        {% endfor %}
-                    </select>
-    
-                    
-                    <div class="select__or__input__container">
-                        <p class="text__without__padding_margin">Cabin Type</p>
-    
-                        <select id="cabin-type-select">
-                            <option value="0" class="visual-none">Economy</option>
-                            <option value="0" >Economy</option>
-                            <option value="1">Business</option>
-                            <option value="2">First Class</option>
+        <form method="post" action="{% url 'search-flights' %}">
+            <fieldset class="fieldset__filter">
+                <legend>Search Parameters</legend>
+            
+                <div class="filter__container">
+                    <div class="filter__container__object">
+                        <select id="departure-airport-select" name='departure_airport'>
+                            <option value="0" class="visual-none">From</option>
+                            <option value="0" >From</option>
+                            {% for airport in airports %}
+                                    <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
+                                </tr>
+                            {% endfor %}
                         </select>
+        
+                        <select id="arrival-airport-select" name='arrival_airport'>
+                            <option value="0" class="visual-none">To</option>
+                            <option value="0" >To</option>
+                            {% for airport in airports %}
+                                    <option value="{{ airport.ID }}">{{ airport.IATACode }}</option>
+                                </tr>
+                            {% endfor %}
+                        </select>
+        
+                        
+                        <div class="select__or__input__container">
+                            <p class="text__without__padding_margin">Cabin Type</p>
+        
+                            <select id="cabin-type-select" name='fly_class'>
+                                <option value="1" class="visual-none">Economy</option>
+                                <option value="1" >Economy</option>
+                                <option value="1.3">Business</option>
+                                <option value="1.755">First Class</option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="filter__container__object">
+                        <div class="select__or__input__container">
+                            <input type="radio" id="pathChoice1" name="path" value="email" />
+                            <label for="pathChoice1">Return</label>
+
+                            <input type="radio" id="pathChoice2" name="path" value="phone" />
+                            <label for="pathChoice2">One way</label>
+                        </div>
+
+                        <div class="select__or__input__container">
+                            <p class="text__without__padding_margin">Outbound</p>
+                            <input type="date" id="date-select" name="outbound">
+                        </div>
+
+                        <div class="select__or__input__container">
+                            <p class="text__without__padding_margin">Return</p>
+                            <input type="date" id="date-return-select" name="return">
+                        </div>
+
+                        <button id="changeFlights">Apply</button>
                     </div>
                 </div>
-
-
-                <div class="filter__container__object">
-                    <div class="select__or__input__container">
-                        <input type="radio" id="pathChoice1" name="path" value="email" />
-                        <label for="pathChoice1">Return</label>
-
-                        <input type="radio" id="pathChoice2" name="path" value="phone" />
-                        <label for="pathChoice2">One way</label>
-                    </div>
-
-                    <div class="select__or__input__container">
-                        <p class="text__without__padding_margin">Outbound</p>
-                        <input type="date" id="date-select">
-                    </div>
-
-                    <div class="select__or__input__container">
-                        <p class="text__without__padding_margin">Return</p>
-                        <input type="date" id="date-return-select">
-                    </div>
-
-                    <button id="changeFlights">Apply</button>
-                </div>
-            </div>
-        </fieldset>
-
+            </fieldset>
+        
 
 
         <div class="search-flights__title">
@@ -96,11 +96,32 @@
                         </tr>
                     </thead>
                     <tbody  id="tbodyAdminTableUsers">
-                        <!--<tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>-->
+                        {% for path_outbound in paths_outbound %}
+                                <tr>
+                                    <th>
+                                        {% for route in path_outbound.4 %}
+                                            {{route}}
+                                            {% if not forloop.last %} 
+                                                -
+                                            {% endif %}  
+                                        {% endfor %}
+                                    </th>
+                                    <th>{{path_outbound.0}}</th>
+                                    <th>{{path_outbound.1}}</th>
+                                    <th>{{path_outbound.2}}</th>
+                                    <th>{{path_outbound.3}}</th>
+                                    <th>
+                                        {% for route1 in path_outbound.6 %}
+                                            {{route1}} 
+                                            {% if not forloop.last %} 
+                                                -
+                                            {% endif %} 
+                                        {% endfor %}
+                                    </th>
+                                    <th>{{path_outbound.5}}</th>
+                                    <th>{{ path_outbound.7 }}</th>
+                                </tr>
+                        {% endfor %}                         
                     </tbody>
                 </table>
 
@@ -113,7 +134,7 @@
                     <p>Display three days before and after</p>
                 </div>
             </div>
-
+        
                 <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
                     <thead>
                         <tr>
@@ -128,13 +149,35 @@
                         </tr>
                     </thead>
                     <tbody  id="tbodyAdminTableUsers2">
-                        <!--<tr>
-                                <td></td>
-                                <td></td>
-                                <td></td>
-                            </tr>-->
+                        {% for path_outbound in paths_return %}
+                            <tr>
+                                <th>
+                                    {% for route in path_outbound.4 %}
+                                        {{route}}
+                                        {% if not forloop.last %} 
+                                            -
+                                        {% endif %}  
+                                    {% endfor %}
+                                </th>
+                                <th>{{path_outbound.1}}</th>
+                                <th>{{path_outbound.0}}</th>
+                                <th>{{path_outbound.2}}</th>
+                                <th>{{path_outbound.3}}</th>
+                                <th>
+                                    {% for route1 in path_outbound.6 %}
+                                        {{route1}} 
+                                        {% if not forloop.last %} 
+                                            -
+                                        {% endif %} 
+                                    {% endfor %}
+                                </th>
+                                <th>{{path_outbound.5}}</th>
+                                <th>{{ path_outbound.7 }}</th>
+                            </tr>
+                        {% endfor %}  
                     </tbody>
-                </table>
+               </table>
+        </form>
     </div>
     
     
