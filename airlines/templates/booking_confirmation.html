@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+        <form method="post" action="{% url 'book_confirmation' %}">
+            <fieldset class="fieldset__outbound">
+                <legend>Outbound flight details</legend>
+                <div class="Outbound__container">
+                    <div class="Outbound__container__object">
+                        <div style="display: inline-block;">From: </div>
+                        <div style="display: inline-block;">To: </div>
+                        <div style="display: inline-block;">Cabin Type: </div>
+                        <div style="display: inline-block;">Date: </div>
+                        <div style="display: inline-block;">Flight number: </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="fieldset__return">
+                <legend>Return flight details</legend>
+                <div class="Return__container">
+                    <div class="Return__container__object">
+                        <div style="display: inline-block;">From: </div>
+                        <div style="display: inline-block;">To: </div>
+                        <div style="display: inline-block;">Cabin Type: </div>
+                        <div style="display: inline-block;">Date: </div>
+                        <div style="display: inline-block;">Flight number: </div>
+                    </div>
+                </div>
+            </fieldset>
+
+        </form>
+        <fieldset class="fieldset__filter">
+                <legend>Passenger details</legend>
+                <div class="filter__container">
+                        <div class="select__or__input__container">
+                            <label for="Name">Firstname</label>
+                            <input type="text" id="firstname"/>
+
+                            <label for="Lastname">Lastname</label>
+                            <input type="text" id="lastname"/>
+
+                            <label for="birthdate">Lastname</label>
+                            <input type="date" id="date-select"/>
+
+                        </div>
+
+                    <div class="">
+                        <div class="select__or__input__container">
+                            <label for="passportNumber">Passport number</label>
+                            <input type="text" id="passportNumber"/>
+
+                            <label for="Lastname">Passport country</label>
+                            <select id="cabin-type-select" name='fly_class'>
+                                <option value="1" class="visual-none">Economy</option>
+                                <option value="1" >Economy</option>
+                                <option value="1.3">Business</option>
+                                <option value="1.755">First Class</option>
+                            </select>
+
+                            <label for="telephone">Phone</label>
+                            <input type="tel" id="telephone-number"/>
+
+                        </div>
+
+                        <button id="changeFlights">Add passenger</button>
+                    </div>
+                </div>
+        </fieldset>
+    <p>Passengers list</p>
+     <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
+                    <thead>
+                        <tr>
+                            <th>Firstname</th>
+                            <th>LastName</th>
+                            <th>Birthdate</th>
+                            <th>Passport number</th>
+                            <th>Passport Country</th>
+                            <th>Phone</th>
+
+                        </tr>
+                    </thead>
+                    <tbody  id="tbodyAdminTableUsers2">
+                        {% for path_outbound in paths_return %}
+                            <tr>
+                                <th>#</th>
+                                <th>#</th>
+                                <th>#</th>
+                                <th>#</th>
+                                <th>#</th>
+                                <th>#</th>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+               </table>
+
+
+
+{% endblock %}
