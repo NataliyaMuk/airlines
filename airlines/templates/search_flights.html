@@ -13,7 +13,6 @@
         <form method="post" action="{% url 'search-flights' %}">
             <fieldset class="fieldset__filter">
                 <legend>Search Parameters</legend>
-            
                 <div class="filter__container">
                     <div class="filter__container__object">
                         <select id="departure-airport-select" name='departure_airport'>
@@ -24,7 +23,7 @@
                                 </tr>
                             {% endfor %}
                         </select>
-        
+
                         <select id="arrival-airport-select" name='arrival_airport'>
                             <option value="0" class="visual-none">To</option>
                             <option value="0" >To</option>
@@ -33,11 +32,11 @@
                                 </tr>
                             {% endfor %}
                         </select>
-        
-                        
+
+
                         <div class="select__or__input__container">
                             <p class="text__without__padding_margin">Cabin Type</p>
-        
+
                             <select id="cabin-type-select" name='fly_class'>
                                 <option value="1" class="visual-none">Economy</option>
                                 <option value="1" >Economy</option>
@@ -71,7 +70,7 @@
                     </div>
                 </div>
             </fieldset>
-        
+
 
 
         <div class="search-flights__title">
@@ -101,9 +100,9 @@
                                     <th>
                                         {% for route in path_outbound.4 %}
                                             {{route}}
-                                            {% if not forloop.last %} 
+                                            {% if not forloop.last %}
                                                 -
-                                            {% endif %}  
+                                            {% endif %}
                                         {% endfor %}
                                     </th>
                                     <th>{{path_outbound.0}}</th>
@@ -112,16 +111,16 @@
                                     <th>{{path_outbound.3}}</th>
                                     <th>
                                         {% for route1 in path_outbound.6 %}
-                                            {{route1}} 
-                                            {% if not forloop.last %} 
+                                            {{route1}}
+                                            {% if not forloop.last %}
                                                 -
-                                            {% endif %} 
+                                            {% endif %}
                                         {% endfor %}
                                     </th>
                                     <th>{{path_outbound.5}}</th>
                                     <th>{{ path_outbound.7 }}</th>
                                 </tr>
-                        {% endfor %}                         
+                        {% endfor %}
                     </tbody>
                 </table>
 
@@ -134,7 +133,7 @@
                     <p>Display three days before and after</p>
                 </div>
             </div>
-        
+
                 <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
                     <thead>
                         <tr>
@@ -154,9 +153,9 @@
                                 <th>
                                     {% for route in path_outbound.4 %}
                                         {{route}}
-                                        {% if not forloop.last %} 
+                                        {% if not forloop.last %}
                                             -
-                                        {% endif %}  
+                                        {% endif %}
                                     {% endfor %}
                                 </th>
                                 <th>{{path_outbound.1}}</th>
@@ -165,19 +164,20 @@
                                 <th>{{path_outbound.3}}</th>
                                 <th>
                                     {% for route1 in path_outbound.6 %}
-                                        {{route1}} 
-                                        {% if not forloop.last %} 
+                                        {{route1}}
+                                        {% if not forloop.last %}
                                             -
-                                        {% endif %} 
+                                        {% endif %}
                                     {% endfor %}
                                 </th>
                                 <th>{{path_outbound.5}}</th>
                                 <th>{{ path_outbound.7 }}</th>
                             </tr>
-                        {% endfor %}  
+                        {% endfor %}
                     </tbody>
                </table>
         </form>
+
     </div>
     
     

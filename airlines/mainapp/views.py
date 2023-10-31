@@ -25,7 +25,6 @@ from django.db.models import Count
 from mainapp import models
 
 
-
 def user_session(request, email):
     cursor = connection.cursor()
     # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),'Connection lost.',0)")
@@ -83,7 +82,7 @@ def login_redirect(request):
         return redirect('home_admin')
     else:
         return redirect('home_user')
-    
+
 
 # INSERT INTO `mainapp_files`(`Title`) VALUES (%s)
 
@@ -218,7 +217,6 @@ def manage_flights(request):
     selected_date = request.GET.get('date')
     selected_flight_number = request.GET.get('flightnumber')
     selected_sort = request.GET.get('sort')
-    
 
     schedules = Schedules.objects.all()
 
@@ -233,10 +231,9 @@ def manage_flights(request):
 
     if selected_flight_number and selected_flight_number != '0':
         schedules = schedules.filter(FlightNumber=selected_flight_number)
-	
 
-    #сортировка
-    
+    # сортировка
+
     if selected_sort and selected_sort == '1':
         schedules = schedules.order_by("EconomyPrice")
     if selected_sort and selected_sort == '2':
@@ -246,9 +243,8 @@ def manage_flights(request):
 
     airports = Airports.objects.all()
 
-    context = {'schedules': schedules, 'airports':airports}
-    return render(request, 'manage-flights.html', context) 
-
+    context = {'schedules': schedules, 'airports': airports}
+    return render(request, 'manage-flights.html', context)
 
 
 @csrf_exempt
@@ -275,13 +271,13 @@ def update_confirmation(request):
                 flight.save()
 
         return redirect('manage-flights')
-    return render(request, 'manage-flights.html') 
+    return render(request, 'manage-flights.html')
 
 
 def search_flights(request):
     airports = Airports.objects.all()
-    context = {'airports':airports}
-    return render(request, 'search_flights.html', context) 
+    context = {'airports': airports}
+    return render(request, 'search_flights.html', context)
 
 
 @admin_required
@@ -309,10 +305,14 @@ def add_file_form(request):
 
             if words[0] == 'ADD':
                 words[-1] = 1
-                cursor.execute("INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s LIMIT 1) LIMIT 1),%s,%s,%s)",[words[1],words[2],int(float(words[6])),words[4],words[5],words[7],words[-1],words[3]])
+                cursor.execute(
+                    "INSERT INTO `schedules`(`ID`, `Date`, `Time`, `AircraftID`, `RouteID`, `EconomyPrice`, `Confirmed`, `FlightNumber`) VALUES (NULL,%s,%s,%s,(SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode  = %s LIMIT 1) LIMIT 1),%s,%s,%s)",
+                    [words[1], words[2], int(float(words[6])), words[4], words[5], words[7], words[-1], words[3]])
             else:
                 words[-1] = 0
-                cursor.execute("UPDATE `schedules` SET `Confirmed`= 0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) LIMIT 1) and FlightNumber = %s AND Date = %s AND Time = %s",[words[4],words[5],words[3],words[1],words[2]])
+                cursor.execute(
+                    "UPDATE `schedules` SET `Confirmed`= 0 WHERE (SELECT id FROM routes WHERE DepartureAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) and ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = %s LIMIT 1) LIMIT 1) and FlightNumber = %s AND Date = %s AND Time = %s",
+                    [words[4], words[5], words[3], words[1], words[2]])
             if words[0] == 'ADD':
                 words[-1] = 1
             else:
@@ -328,84 +328,164 @@ def add_file_form(request):
         return render(request, 'add_file_form.html', {'form': form})
 
 
-
-
 def view_reports_summary(request):
-    count_male = ReportMay.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male'] + ReportJune.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male'] + ReportJuly.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male']
-    count_female = ReportMay.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female'] + ReportJune.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female'] + ReportJuly.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female']
-    count_age18_24 = ReportMay.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24'] + ReportJune.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24'] + ReportJuly.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24']
-    count_age25_39 = ReportMay.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39'] + ReportJune.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39'] + ReportJuly.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39']
-    count_age40_59 = ReportMay.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59'] + ReportJune.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59'] + ReportJuly.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59']
-    count_age60 = ReportMay.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60'] + ReportJune.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60'] + ReportJuly.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60']
-    count_economy = ReportMay.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy'] + ReportJune.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy'] + ReportJuly.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy']
-    count_business = ReportMay.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business'] + ReportJune.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business'] + ReportJuly.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business']
-    count_first = ReportMay.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first'] + ReportJune.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first'] + ReportJuly.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first']
-    count_auh = ReportMay.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh'] + ReportJune.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh'] + ReportJuly.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh']
-    count_bah = ReportMay.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah'] + ReportJune.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah'] + ReportJuly.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah']
-    count_doh = ReportMay.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh'] + ReportJune.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh'] + ReportJuly.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh']
-    count_ryu = ReportMay.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu'] + ReportJune.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu'] + ReportJuly.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu']
-    count_cai = ReportMay.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai'] + ReportJune.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai'] + ReportJuly.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai']
+    count_male = ReportMay.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male'] + \
+                 ReportJune.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male'] + \
+                 ReportJuly.objects.filter(gender="M").aggregate(count_male=Count("gender"))['count_male']
+    count_female = ReportMay.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female'] + \
+                   ReportJune.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female'] + \
+                   ReportJuly.objects.filter(gender="F").aggregate(count_female=Count("gender"))['count_female']
+    count_age18_24 = ReportMay.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))[
+                         'count_age18_24'] + \
+                     ReportJune.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))[
+                         'count_age18_24'] + \
+                     ReportJuly.objects.filter(age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))[
+                         'count_age18_24']
+    count_age25_39 = ReportMay.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))[
+                         'count_age25_39'] + \
+                     ReportJune.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))[
+                         'count_age25_39'] + \
+                     ReportJuly.objects.filter(age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))[
+                         'count_age25_39']
+    count_age40_59 = ReportMay.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))[
+                         'count_age40_59'] + \
+                     ReportJune.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))[
+                         'count_age40_59'] + \
+                     ReportJuly.objects.filter(age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))[
+                         'count_age40_59']
+    count_age60 = ReportMay.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60'] + \
+                  ReportJune.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60'] + \
+                  ReportJuly.objects.filter(age__gte=60).aggregate(count_age60=Count('age'))['count_age60']
+    count_economy = ReportMay.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))[
+                        'count_economy'] + \
+                    ReportJune.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))[
+                        'count_economy'] + \
+                    ReportJuly.objects.filter(cabintype="Economy").aggregate(count_economy=Count("cabintype"))[
+                        'count_economy']
+    count_business = ReportMay.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))[
+                         'count_business'] + \
+                     ReportJune.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))[
+                         'count_business'] + \
+                     ReportJuly.objects.filter(cabintype="Business").aggregate(count_business=Count("cabintype"))[
+                         'count_business']
+    count_first = ReportMay.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first'] + \
+                  ReportJune.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))[
+                      'count_first'] + \
+                  ReportJuly.objects.filter(cabintype="First").aggregate(count_first=Count("cabintype"))['count_first']
+    count_auh = ReportMay.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh'] + \
+                ReportJune.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh'] + \
+                ReportJuly.objects.filter(arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh']
+    count_bah = ReportMay.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah'] + \
+                ReportJune.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah'] + \
+                ReportJuly.objects.filter(arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah']
+    count_doh = ReportMay.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh'] + \
+                ReportJune.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh'] + \
+                ReportJuly.objects.filter(arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh']
+    count_ryu = ReportMay.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu'] + \
+                ReportJune.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu'] + \
+                ReportJuly.objects.filter(arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu']
+    count_cai = ReportMay.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai'] + \
+                ReportJune.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai'] + \
+                ReportJuly.objects.filter(arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai']
 
-    context = {'count_male':count_male, 'count_female':count_female,  'count_age18_24':count_age18_24, 'count_age25_39':count_age25_39, 'count_age40_59':count_age40_59, 'count_age60':count_age60, 'count_economy':count_economy, 'count_business':count_business, 'count_first':count_first, 'count_auh':count_auh, 'count_bah':count_bah, 'count_doh':count_doh, 'count_ryu':count_ryu, 'count_cai':count_cai}                                                        
+    context = {'count_male': count_male, 'count_female': count_female, 'count_age18_24': count_age18_24,
+               'count_age25_39': count_age25_39, 'count_age40_59': count_age40_59, 'count_age60': count_age60,
+               'count_economy': count_economy, 'count_business': count_business, 'count_first': count_first,
+               'count_auh': count_auh, 'count_bah': count_bah, 'count_doh': count_doh, 'count_ryu': count_ryu,
+               'count_cai': count_cai}
 
-    return render(request, 'reports_summary.html', context) 
-
-
-
+    return render(request, 'reports_summary.html', context)
 
 
 def question_search_data(question, model_name, selected_age, selected_gender):
     dict_of_questions_data = {}
 
-
-    for i in range(1, 8): #оценка от 1 до 7
+    for i in range(1, 8):  # оценка от 1 до 7
 
         dict_of_answer = {}
 
         if (selected_age):
             if (selected_age == '18'):
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(count_total=Count(question))['count_total']
+                count_total = \
+                getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(
+                    count_total=Count(question))['count_total']
             if (selected_age == '25'):
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(count_total=Count(question))['count_total']
+                count_total = \
+                getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(
+                    count_total=Count(question))['count_total']
             if (selected_age == '40'):
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(count_total=Count(question))['count_total']
-            if (selected_age == '60'):  
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(count_total=Count(question))['count_total']
+                count_total = \
+                getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(
+                    count_total=Count(question))['count_total']
+            if (selected_age == '60'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(
+                    count_total=Count(question))['count_total']
 
         elif (selected_gender):
-            count_total = getattr(models, model_name).objects.filter(**{question: i}, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
-       
+            count_total = getattr(models, model_name).objects.filter(**{question: i}, gender=selected_gender).aggregate(
+                count_total=Count(question))['count_total']
+
         elif (selected_gender and selected_age):
             print(selected_age)
             print(selected_gender)
 
             if (selected_age == '18'):
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24,
+                                                                         gender=selected_gender).aggregate(
+                    count_total=Count(question))['count_total']
             if (selected_age == '25'):
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39,
+                                                                         gender=selected_gender).aggregate(
+                    count_total=Count(question))['count_total']
             if (selected_age == '40'):
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
-            if (selected_age == '60'):  
-                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60, gender=selected_gender).aggregate(count_total=Count(question))['count_total']
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59,
+                                                                         gender=selected_gender).aggregate(
+                    count_total=Count(question))['count_total']
+            if (selected_age == '60'):
+                count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60,
+                                                                         gender=selected_gender).aggregate(
+                    count_total=Count(question))['count_total']
 
-        else: 
-            count_total = getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))['count_total']
+        else:
+            count_total = \
+            getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))[
+                'count_total']
         # count_total = getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))['count_total']
-       
-        count_male = getattr(models, model_name).objects.filter(**{question: i}, gender="M").aggregate(count_male=Count("gender"))['count_male']
-        count_female = getattr(models, model_name).objects.filter(**{question: i}, gender="F").aggregate(count_female=Count("gender"))['count_female']
-        count_age18_24 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(count_age18_24=Count('age'))['count_age18_24']
-        count_age25_39 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(count_age25_39=Count('age'))['count_age25_39']
-        count_age40_59 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(count_age40_59=Count('age'))['count_age40_59']
-        count_age60 = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(count_age60=Count('age'))['count_age60']
-        count_economy = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Economy").aggregate(count_economy=Count("cabintype"))['count_economy']
-        count_business = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Business").aggregate(count_business=Count("cabintype"))['count_business']
-        count_first = getattr(models, model_name).objects.filter(**{question: i}, cabintype="First").aggregate(count_first=Count("cabintype"))['count_first']
-        count_auh = getattr(models, model_name).objects.filter(**{question: i}, arrival="AUH").aggregate(count_auh=Count("arrival"))['count_auh']
-        count_bah = getattr(models, model_name).objects.filter(**{question: i}, arrival="BAH").aggregate(count_bah=Count("arrival"))['count_bah']
-        count_doh = getattr(models, model_name).objects.filter(**{question: i}, arrival="DOH").aggregate(count_doh=Count("arrival"))['count_doh']
-        count_ryu = getattr(models, model_name).objects.filter(**{question: i}, arrival="RYU").aggregate(count_ryu=Count("arrival"))['count_ryu']
-        count_cai = getattr(models, model_name).objects.filter(**{question: i}, arrival="CAI").aggregate(count_cai=Count("arrival"))['count_cai']
+
+        count_male = \
+        getattr(models, model_name).objects.filter(**{question: i}, gender="M").aggregate(count_male=Count("gender"))[
+            'count_male']
+        count_female = \
+        getattr(models, model_name).objects.filter(**{question: i}, gender="F").aggregate(count_female=Count("gender"))[
+            'count_female']
+        count_age18_24 = \
+        getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(
+            count_age18_24=Count('age'))['count_age18_24']
+        count_age25_39 = \
+        getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(
+            count_age25_39=Count('age'))['count_age25_39']
+        count_age40_59 = \
+        getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(
+            count_age40_59=Count('age'))['count_age40_59']
+        count_age60 = \
+        getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(count_age60=Count('age'))[
+            'count_age60']
+        count_economy = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Economy").aggregate(
+            count_economy=Count("cabintype"))['count_economy']
+        count_business = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Business").aggregate(
+            count_business=Count("cabintype"))['count_business']
+        count_first = getattr(models, model_name).objects.filter(**{question: i}, cabintype="First").aggregate(
+            count_first=Count("cabintype"))['count_first']
+        count_auh = getattr(models, model_name).objects.filter(**{question: i}, arrival="AUH").aggregate(
+            count_auh=Count("arrival"))['count_auh']
+        count_bah = getattr(models, model_name).objects.filter(**{question: i}, arrival="BAH").aggregate(
+            count_bah=Count("arrival"))['count_bah']
+        count_doh = getattr(models, model_name).objects.filter(**{question: i}, arrival="DOH").aggregate(
+            count_doh=Count("arrival"))['count_doh']
+        count_ryu = getattr(models, model_name).objects.filter(**{question: i}, arrival="RYU").aggregate(
+            count_ryu=Count("arrival"))['count_ryu']
+        count_cai = getattr(models, model_name).objects.filter(**{question: i}, arrival="CAI").aggregate(
+            count_cai=Count("arrival"))['count_cai']
 
         # if (count_total):
         if 'count_total' in locals():
@@ -424,177 +504,184 @@ def question_search_data(question, model_name, selected_age, selected_gender):
         dict_of_answer['count_bah'] = count_bah
         dict_of_answer['count_doh'] = count_doh
         dict_of_answer['count_ryu'] = count_ryu
-        dict_of_answer['count_cai'] = count_cai    
+        dict_of_answer['count_cai'] = count_cai
 
         dict_of_questions_data[i] = dict_of_answer
 
     return dict_of_questions_data
-    
+
 
 def view_reports_detailed(request):
-
     selected_month = "ReportMay"
 
     selected_age = '18'
-    selected_gender ='M'
+    selected_gender = 'M'
 
     if request.method == 'GET':
-        if (isinstance(request.GET.get('month'), str)): #является ли selected_month строкой
+        if (isinstance(request.GET.get('month'), str)):  # является ли selected_month строкой
             selected_month = request.GET.get('month')
-        if (isinstance(request.GET.get('age'), str)): #является ли selected_age строкой
+        if (isinstance(request.GET.get('age'), str)):  # является ли selected_age строкой
             selected_age = request.GET.get('age')
-        if (isinstance(request.GET.get('gender'), str)): #является ли selected_gender строкой
+        if (isinstance(request.GET.get('gender'), str)):  # является ли selected_gender строкой
             selected_gender = request.GET.get('gender')
-
 
     dict_of_question_data_1 = question_search_data('q1', selected_month, selected_age, selected_gender)
     dict_of_question_data_2 = question_search_data('q2', selected_month, selected_age, selected_gender)
     dict_of_question_data_3 = question_search_data('q3', selected_month, selected_age, selected_gender)
     dict_of_question_data_4 = question_search_data('q4', selected_month, selected_age, selected_gender)
 
-    context = {'dict_of_question_data_1':dict_of_question_data_1.values(), 'dict_of_question_data_2':dict_of_question_data_2.values(), 'dict_of_question_data_3':dict_of_question_data_3.values(), 'dict_of_question_data_4':dict_of_question_data_4.values()}
+    context = {'dict_of_question_data_1': dict_of_question_data_1.values(),
+               'dict_of_question_data_2': dict_of_question_data_2.values(),
+               'dict_of_question_data_3': dict_of_question_data_3.values(),
+               'dict_of_question_data_4': dict_of_question_data_4.values()}
 
     return render(request, 'reports_detailed.html', context)
 
-def search_path(request,end,start):
 
+def search_path(request, end, start):
     # Этапы разработки:
     # 1)Сделать функцию для записи в древо(НУЖНО КАК-ТО ПОНЯТЬ КУДА ЗАПИСЫВАТЬ(КООРДИНАТЫ))
     # 2)Сделать функцию самого построения древа, которая на данные будет вызывать функцию заполнения
     # 3)Сделать функцию парса древа, которая будет понимать,что ветка тупиковая.
     # 
 
-
     if request.method == 'POST':
-        end_point = [end] #временная задана так переменная, потом получать из формы поста.
-        start_point = [start] 
+        end_point = [end]  # временная задана так переменная, потом получать из формы поста.
+        start_point = [start]
     else:
-        end_point = [6] #временная задана так переменная, потом получать из формы поста.
-        start_point = [4] 
+        end_point = [6]  # временная задана так переменная, потом получать из формы поста.
+        start_point = [4]
     global routes_tree
     routes_tree = []
 
-    class flight_route: 
-        def __init__(self,sql,points):
-            self.sql = sql #сам маршрут расписание
-            self.points = points #массив из объектов flight_route маршрутов из которых можно прилететь в данный маршрут
+    class flight_route:
+        def __init__(self, sql, points):
+            self.sql = sql  # сам маршрут расписание
+            self.points = points  # массив из объектов flight_route маршрутов из которых можно прилететь в данный маршрут
 
     cursor = connection.cursor()
     # "SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT id FROM airports WHERE IATACode = 'DOH'));"
-    cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s);",[end_point[0]]) #получение всех вылетов до нужной точки
-    
-    results = cursor.fetchall() #получаю запрос
+    cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s);",
+                   [end_point[0]])  # получение всех вылетов до нужной точки
+
+    results = cursor.fetchall()  # получаю запрос
     # print("results",len(results))
     # здесь написать функцию для записи в древо!(не забыть ее вызвать первый раз вне функции построения древа)
-    #ААААААААААААААААААААААААА!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!минус мозг!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #Приблизительный образ это объект flight_route,хранящий sql и массив такихже объектов, из которых в него можно прилететь
-    all_flights = [] #все полеты
+    # ААААААААААААААААААААААААА!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!минус мозг!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # Приблизительный образ это объект flight_route,хранящий sql и массив такихже объектов, из которых в него можно прилететь
+    all_flights = []  # все полеты
 
-    def build_routes_tree(flight_obj,all_points): #функция должна вернуть древо всех потенциальных маршрутов(придумать как удалить тупиковые ветви(или сделать это в функции парса))
-        all_ways=[] #тут я собираю массив всех маршрутов до точки
+    def build_routes_tree(flight_obj,
+                          all_points):  # функция должна вернуть древо всех потенциальных маршрутов(придумать как удалить тупиковые ветви(или сделать это в функции парса))
+        all_ways = []  # тут я собираю массив всех маршрутов до точки
         # routes_tree.append(flight_route())
-        cursor.execute("SELECT DepartureAirportID FROM routes WHERE id = %s",[flight_obj[4]])
-        points_list = cursor.fetchall() #я получил все аэропорты из которых можно прилетить в исходный и это массив массивов из одного элемента
+        cursor.execute("SELECT DepartureAirportID FROM routes WHERE id = %s", [flight_obj[4]])
+        points_list = cursor.fetchall()  # я получил все аэропорты из которых можно прилетить в исходный и это массив массивов из одного элемента
         points = []
         for point_list in points_list:
             points.append(point_list[0])
         # print("points",points,all_points)
-        if not(points):
-            return [flight_route([False,"er1"],[False])]
+        if not (points):
+            return [flight_route([False, "er1"], [False])]
         # print("points",points,all_points)
-        for point in points: #проверяю наличие таких аэропортов в точке вылета и что это не конечный аэропорт и заполняю аэропорты отправления
+        for point in points:  # проверяю наличие таких аэропортов в точке вылета и что это не конечный аэропорт и заполняю аэропорты отправления
             if point == start_point[0]:
-                return [flight_route([True],[True])]
+                return [flight_route([True], [True])]
             # print("AFTER START POINT")
             if point in all_points:
-                points.remove(point)#если уже есть точка в списке , то мы ее удаляем и переходим к следующей точке
+                points.remove(point)  # если уже есть точка в списке , то мы ее удаляем и переходим к следующей точке
                 if points == []:
                     # all_points.append(point)
-                    return [flight_route([False,"er3"],[False])]
+                    return [flight_route([False, "er3"], [False])]
                 continue
             # return (point,all_points,all_points.append(flight_obj.sql[0]),points)
             all_points.append(point)
-            cursor.execute("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s) and `Date` <= %s and IF(`Date` = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[point,flight_obj[1],flight_obj[1],flight_obj[2]]) #Получаем все расписания , с учетом, что рейс прилетает в аэропорт раньше, чем отлетает до нужного
+            cursor.execute(
+                "SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = %s) and `Date` <= %s and IF(`Date` = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",
+                [point, flight_obj[1], flight_obj[1], flight_obj[
+                    2]])  # Получаем все расписания , с учетом, что рейс прилетает в аэропорт раньше, чем отлетает до нужного
             # ("SELECT * FROM `schedules` WHERE RouteID IN (SELECT id FROM routes WHERE ArrivalAirportID = (SELECT DepartureAirportID FROM routes WHERE id = %s)) and Date <= %s and IF(Date = %s,SEC_TO_TIME(HOUR(Time)*3600+MINUTE(Time)*60+SEC_TO_TIME((SELECT FlightTime FROM routes WHERE id = 11)*60)) <= %s,1)",[result[4],result[1],result[1],]) сохранить на всякий
-            ways = cursor.fetchall() #получаю все маршруты из данного аэропорта
+            ways = cursor.fetchall()  # получаю все маршруты из данного аэропорта
             if ways == ():
-                return [flight_route([False,"er4"],[False])]
+                return [flight_route([False, "er4"], [False])]
             # return [point,"TTTT",flight_obj.sql]
 
             # print("////////////////////////")
             # print(ways)
             # print("\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\")
 
-            for way in ways: #перебераю все пути отправления , загоняю в объекты , а потом запихиваю в массив
-                flight_obj2 = flight_route(way,[])
+            for way in ways:  # перебераю все пути отправления , загоняю в объекты , а потом запихиваю в массив
+                flight_obj2 = flight_route(way, [])
                 # print(flight_obj,way)
-                flight_obj2.points = build_routes_tree(flight_obj2.sql,all_points) #вызываем рекрсивно функцию для заполения массивов
-                all_ways.append(flight_obj2) #собираем все пути, которые потом будут лежать в объекте.
+                flight_obj2.points = build_routes_tree(flight_obj2.sql,
+                                                       all_points)  # вызываем рекрсивно функцию для заполения массивов
+                all_ways.append(flight_obj2)  # собираем все пути, которые потом будут лежать в объекте.
         # print("all_ways",all_ways)
         return all_ways
 
-    for result in results: #перебираю все стартовые расписания
-        flight_obj = flight_route(result,[]) #иничу базовые объекты расписания
-        flight_obj.points = build_routes_tree(flight_obj.sql,[])
-        all_flights.append(flight_obj) #заполняю полеты, вызывая рекурсивную функцию (.points[0].points)
+    for result in results:  # перебираю все стартовые расписания
+        flight_obj = flight_route(result, [])  # иничу базовые объекты расписания
+        flight_obj.points = build_routes_tree(flight_obj.sql, [])
+        all_flights.append(flight_obj)  # заполняю полеты, вызывая рекурсивную функцию (.points[0].points)
+
     # print("all_flights",len(all_flights))
 
-    def parse_tree(flight,schedules1):
+    def parse_tree(flight, schedules1):
         # print("points",flight.points)
         # print("AAAAAAA")
         # print("MDA",flight.sql,flight.points)
         # if flight.points == []:
         #     return [False]
-       
-        schedules1=[]
+
+        schedules1 = []
         for point in flight.points:
             schedules2 = []
             # print("error point",point)
             if point == False:
                 # print("ФОЛСА!",[flight.points])
                 return [[flight.sql[0]]]
-        # print("flight.points[0]",flight.points[0].points)
+            # print("flight.points[0]",flight.points[0].points)
             if point == True:
                 # print("ИСТИННО ТРУШНО")
                 # print(flight.sql)
-                return [[True]] #schedules1
-            schedules2.extend(parse_tree(point,[]))
+                return [[True]]  # schedules1
+            schedules2.extend(parse_tree(point, []))
             # print("schedules2",schedules2)
             # print("ПОШЕЛ СЛЕДУЮЩИЙ!")
             # print(schedules2)
             # print("schedules2",schedules2)
             for schedule2 in schedules2:
                 # print("schedule2",schedule2)
-                schedule2=list(schedule2)
+                schedule2 = list(schedule2)
 
                 # print("schedule2",schedule2)
                 schedule2.append(point.sql)
                 # print("schedule2_append",schedule2)
                 # print("append",schedule2)
-                schedules1.append(schedule2) #extend
+                schedules1.append(schedule2)  # extend
             # print("schedules1FFFF",schedules1)
         # print("schedules1")
         # print(schedules1)
         return schedules1
-     
+
     # Парсинг древа возвращает массив массивов все доступных вариантов.
     shedules = []
     # print("EEEEEE!")
     for flight in all_flights:
         # print("flight.sql",flight.sql)
         # print("PARSING!")
-        res = parse_tree(flight,[])
+        res = parse_tree(flight, [])
         # print("res",res)
         if res == None:
             continue
         res = list(res)
-        for i in range(len(res)-1):
+        for i in range(len(res) - 1):
             # print("flight.sql",flight.sql)
             res[i].append(flight.sql)
         shedules.extend(res)
         # print("shedules",shedules)
     # print("shedules",shedules)
-            
+
     # all_flights
     # all_flights[0].points
     # all_flights[0].points[0].points
@@ -603,8 +690,9 @@ def search_path(request,end,start):
     if request.method == 'POST':
         return shedules
     else:
-        context = {'files': [shedules] , 'readers':["readers"] } 
-        return render(request, 'error_page.html', context) 
+        context = {'files': [shedules], 'readers': ["readers"]}
+        return render(request, 'error_page.html', context)
+
 
 @csrf_exempt
 def search_flights(request):
@@ -612,10 +700,11 @@ def search_flights(request):
     airports = Airports.objects.all()
     if request.method == "POST":
         # print("HOHOHO")
-        print("request.POST[display_three_days_outbound_checkbox]",request.POST.get('display_three_days_return_checkbox'))
-        all_ways = search_path(request,int(request.POST['arrival_airport']),int(request.POST['departure_airport']))
-        delta = datetime.timedelta(weeks = 0, days = 3, hours = 0, seconds = 0)
-        print("delta",type(delta))
+        print("request.POST[display_three_days_outbound_checkbox]",
+              request.POST.get('display_three_days_return_checkbox'))
+        all_ways = search_path(request, int(request.POST['arrival_airport']), int(request.POST['departure_airport']))
+        delta = datetime.timedelta(weeks=0, days=3, hours=0, seconds=0)
+        print("delta", type(delta))
         # print(all_ways)
         # print("LEN:",len(all_ways))
 
@@ -623,26 +712,23 @@ def search_flights(request):
         # print(type(datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d')))
 
         if str(request.POST.get('display_three_days_outbound_checkbox')) == "yes":
-            delta = datetime.timedelta(weeks = 0, days = 3, hours = 0, seconds = 0)
+            delta = datetime.timedelta(weeks=0, days=3, hours=0, seconds=0)
             start_data_outbound = datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d') - delta
             end_data_outbound = datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d') + delta
         else:
             data_outbound = request.POST['outbound']
-            print("data_outbound",data_outbound)
-        
+            print("data_outbound", data_outbound)
+
         if str(request.POST.get('display_three_days_return_checkbox')) == "yes":
-            delta = datetime.timedelta(weeks = 0, days = 3, hours = 0, seconds = 0)
+            delta = datetime.timedelta(weeks=0, days=3, hours=0, seconds=0)
             start_data_return = datetime.datetime.strptime(request.POST['return'], '%Y-%m-%d') - delta
             end_data_return = datetime.datetime.strptime(request.POST['return'], '%Y-%m-%d') + delta
         else:
             data_return = request.POST['return']
-            print("data_return",data_return)
-
-
+            print("data_return", data_return)
 
         paths_return = []
-        paths_outbound=[]
-
+        paths_outbound = []
 
         for ways in all_ways:
             if ways[0] == True:
@@ -655,29 +741,31 @@ def search_flights(request):
                     # print("end_data.date",end_data.date())
                     # print("ways[0][1] > end_data.date()",ways[0][1] > end_data.date())
                     if ways[0][1] <= end_data_outbound.date() and ways[0][1] >= start_data_outbound.date():
-                        parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
-                        parsed_way = [[],0,[]]
+                        parsed_ways = [airports[int(request.POST['departure_airport']) - 2],
+                                       airports[int(request.POST['arrival_airport']) - 2], ways[0][1], ways[0][2]]
+                        parsed_way = [[], 0, []]
                         for way in ways:
                             parsed_way[0].append(way[0])
                             parsed_way[2].append(way[-1])
                             # print("int(request.POST['fly_class']",request.POST['fly_class'])
                             # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                            parsed_way[1] += way[5]*float(request.POST['fly_class'])
-                            parsed_way[1] = round(parsed_way[1],1)
-                            print("parsed_way[1]",parsed_way[1])
+                            parsed_way[1] += way[5] * float(request.POST['fly_class'])
+                            parsed_way[1] = round(parsed_way[1], 1)
+                            print("parsed_way[1]", parsed_way[1])
                         parsed_ways.extend(parsed_way)
                         parsed_ways.append(len(ways))
                         paths_outbound.append(parsed_ways)
                     continue
                 if str(ways[0][1]) == data_outbound:
-                    parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
-                    parsed_way = [[],0,[]]
+                    parsed_ways = [airports[int(request.POST['departure_airport']) - 2],
+                                   airports[int(request.POST['arrival_airport']) - 2], ways[0][1], ways[0][2]]
+                    parsed_way = [[], 0, []]
                     for way in ways:
                         parsed_way[0].append(way[0])
                         parsed_way[2].append(way[-1])
                         # print("int(request.POST['fly_class']",request.POST['fly_class'])
                         # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                        parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                        parsed_way[1] += way[5] * float(request.POST['fly_class'])
                     parsed_ways.extend(parsed_way)
                     parsed_ways.append(len(ways))
                     paths_outbound.append(parsed_ways)
@@ -686,9 +774,10 @@ def search_flights(request):
                 continue
         if paths_outbound == []:
             paths_outbound.append("Маршрутов, удовлетворяющим вашим условиям не найдено.")
-        
+
         if request.POST['return']:
-            all_ways = search_path(request,int(request.POST['departure_airport']),int(request.POST['arrival_airport']))
+            all_ways = search_path(request, int(request.POST['departure_airport']),
+                                   int(request.POST['arrival_airport']))
             for ways in all_ways:
                 if ways[0] == True:
                     # ways = list(ways)
@@ -700,32 +789,34 @@ def search_flights(request):
                         # print("end_data.date",end_data.date())
                         # print("ways[0][1] > end_data.date()",ways[0][1] > end_data.date())
                         if ways[0][1] <= end_data_return.date() and ways[0][1] >= start_data_return.date():
-                            parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
-                            parsed_way = [[],0,[]]
+                            parsed_ways = [airports[int(request.POST['departure_airport']) - 2],
+                                           airports[int(request.POST['arrival_airport']) - 2], ways[0][1], ways[0][2]]
+                            parsed_way = [[], 0, []]
                             for way in ways:
                                 # print("way[0]",way[0])
-                                print("way[0]",way[0])
+                                print("way[0]", way[0])
                                 parsed_way[0].append(way[0])
                                 # print("way[-1]",way[7])
-                                print("way[7]",way[-1])
+                                print("way[7]", way[-1])
                                 parsed_way[2].append(way[7])
                                 # print("int(request.POST['fly_class']",request.POST['fly_class'])
                                 # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                                parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                                parsed_way[1] += way[5] * float(request.POST['fly_class'])
                             parsed_ways.extend(parsed_way)
                             # print("parsed_ways]",parsed_ways)
                             parsed_ways.append(len(ways))
                             paths_return.append(parsed_ways)
                         continue
                     if str(ways[0][1]) == data_return:
-                        parsed_ways = [airports[int(request.POST['departure_airport'])-2],airports[int(request.POST['arrival_airport'])-2],ways[0][1],ways[0][2]]
-                        parsed_way = [[],0,[]]
+                        parsed_ways = [airports[int(request.POST['departure_airport']) - 2],
+                                       airports[int(request.POST['arrival_airport']) - 2], ways[0][1], ways[0][2]]
+                        parsed_way = [[], 0, []]
                         for way in ways:
                             parsed_way[0].append(way[0])
                             parsed_way[2].append(way[-1])
                             # print("int(request.POST['fly_class']",request.POST['fly_class'])
                             # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                            parsed_way[1] += way[5]*float(request.POST['fly_class'])
+                            parsed_way[1] += way[5] * float(request.POST['fly_class'])
                         parsed_ways.extend(parsed_way)
                         parsed_ways.append(len(ways))
                         paths_return.append(parsed_ways)
@@ -734,18 +825,19 @@ def search_flights(request):
                     continue
             if paths_return == []:
                 paths_return.append("Маршрутов, удовлетворяющим вашим условиям не найдено.")
-        
-        
+
         # print("paths_return:",paths_return)
         # print("paths_outbound:",paths_outbound)
-        context = {'airports':airports,'paths_outbound':paths_outbound,"paths_return":paths_return} #'outbound_flight ':outbound_flight ,'return_flight ':return_flight 
-        return render(request, 'search_flights.html', context) 
+        context = {'airports': airports, 'paths_outbound': paths_outbound,
+                   "paths_return": paths_return}  # 'outbound_flight ':outbound_flight ,'return_flight ':return_flight
+        return render(request, 'search_flights.html', context)
     else:
-        context = {'airports':airports}
-        return render(request, 'search_flights.html', context) 
+        context = {'airports': airports}
+        return render(request, 'search_flights.html', context)
+
 
 @admin_required
 def booking_confirmation(request):
-
-    context = {'files': [shedules] , 'readers':["readers"] } 
-    return render(request, 'error_page.html', context) 
+    context = {}  # 'files': [shedules] ,
+    # 'readers':["readers"] }
+    return render(request, 'booking_confirmation.html', context)
