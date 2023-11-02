@@ -1,31 +1,40 @@
 {% extends 'base.html' %}
 
+{% load static %}
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/search-flights.css' %}">{% endblock style %}
+
 {% block content %}
 
         <form method="post" action="{% url 'book_confirmation' %}">
             <fieldset class="fieldset__outbound">
                 <legend>Outbound flight details</legend>
                 <div class="Outbound__container">
+                    {% for departWay in departWays%}
                     <div class="Outbound__container__object">
-                        <div style="display: inline-block;">From: </div>
-                        <div style="display: inline-block;">To: </div>
-                        <div style="display: inline-block;">Cabin Type: </div>
-                        <div style="display: inline-block;">Date: </div>
-                        <div style="display: inline-block;">Flight number: </div>
+                        <div style="display: inline-block;">From: {{departWay.8.0}}</div>
+                        <div style="display: inline-block;">To: {{departWay.9.0}}</div>
+                        <div style="display: inline-block;">Cabin Type: {{fly_class}}</div>
+                        <div style="display: inline-block;">Date: {{departWay.1}}</div>
+                        <div style="display: inline-block;">Flight number: {{departWay.7}}</div>
+                        <div class="visual-none">ID: {{departWay.0}}</div>
                     </div>
+                    {% endfor %}
                 </div>
             </fieldset>
             <fieldset class="fieldset__return">
-                <legend>Return flight details</legend>
-                <div class="Return__container">
-                    <div class="Return__container__object">
-                        <div style="display: inline-block;">From: </div>
-                        <div style="display: inline-block;">To: </div>
-                        <div style="display: inline-block;">Cabin Type: </div>
-                        <div style="display: inline-block;">Date: </div>
-                        <div style="display: inline-block;">Flight number: </div>
+                {% if returnWays %}
+                    <legend>Return flight details</legend>
+                    {% for returnWay in returnWays%}
+                    <div class="Outbound__container__object">
+                        <div style="display: inline-block;">From: {{returnWay.8.0}}</div>
+                        <div style="display: inline-block;">To: {{returnWay.9.0}}</div>
+                        <div style="display: inline-block;">Cabin Type: {{fly_class}}</div>
+                        <div style="display: inline-block;">Date: {{returnWay.1}}</div>
+                        <div style="display: inline-block;">Flight number: {{returnWay.7}}</div>
+                        <div class="visual-none">ID: {{returnWay.0}}</div>
                     </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
             </fieldset>
 
         </form>
@@ -39,7 +48,7 @@
                             <label for="Lastname">Lastname</label>
                             <input type="text" id="lastname"/>
 
-                            <label for="birthdate">Lastname</label>
+                            <label for="birthdate">Birthdate</label>
                             <input type="date" id="date-select"/>
 
                         </div>
@@ -62,7 +71,7 @@
 
                         </div>
 
-                        <button id="changeFlights">Add passenger</button>
+                        <button id="changeFlights" onclick="add_user(event)">Add passenger</button>
                     </div>
                 </div>
         </fieldset>
@@ -80,19 +89,70 @@
                         </tr>
                     </thead>
                     <tbody  id="tbodyAdminTableUsers2">
-                        {% for path_outbound in paths_return %}
-                            <tr>
-                                <th>#</th>
-                                <th>#</th>
-                                <th>#</th>
-                                <th>#</th>
-                                <th>#</th>
-                                <th>#</th>
-                            </tr>
-                        {% endfor %}
+                        
                     </tbody>
                </table>
 
+            <template id="template">
+                <tr>
+                    <th class="template_th">#</th>
+                    <th class="template_th">#</th>
+                    <th class="template_th">#</th>
+                    <th class="template_th">#</th>
+                    <th class="template_th">#</th>
+                    <th class="template_th">#</th>
+                </tr>
+            </template>
+            <button id="deleteUser" onclick="delete_user(event)">Delete passenger</button>
+            <form action="">
+                <!-- невидимая форма тут для 3.5 -->
+                <button>Confim booking</button>
+            </form>
+            
+    <script>
+        // добавить логику для невидимой формы и перехода на 3.5
+        counter = 0
+        function add_user(event){
 
+            var firstname = document.getElementById('firstname').value;
+            var lastname = document.getElementById('lastname').value;
+            var dateSelect = document.getElementById('date-select').value;
+            var passportNumber = document.getElementById('passportNumber').value;
+            var text =  document.getElementById('cabin-type-select').options[document.getElementById('cabin-type-select').selectedIndex].text;
+            var telephoneNumber = document.getElementById('telephone-number').value;
+
+            var template = document.getElementById('template');
+            var newRow = template.content.cloneNode(true);
+
+            var thElements = newRow.querySelectorAll('.template_th');
+
+            thElements[0].textContent = firstname;
+            thElements[1].textContent = lastname;
+            thElements[2].textContent = dateSelect;
+            thElements[3].textContent = passportNumber;
+            thElements[4].textContent = text;
+            thElements[5].textContent = telephoneNumber;
+
+            document.getElementById('firstname').value = "";
+            document.getElementById('lastname').value = "";
+            document.getElementById('date-select').value = "";
+            document.getElementById('passportNumber').value = "";
+            document.getElementById('cabin-type-select').selectedIndex = 1;
+            document.getElementById('telephone-number').value = "";
+
+
+            var table = document.getElementById('tableOfUsersAdminPage');
+
+            table.appendChild(newRow);
+        }
+        
+        function delete_user(event){
+            var table = document.getElementById('tableOfUsersAdminPage');
+            var thElements = table.querySelectorAll('tr');
+            if (thElements.length != 1){
+                table.removeChild(table.lastChild);
+            }
+        }
+    </script>
 
 {% endblock %}

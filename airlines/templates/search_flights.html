@@ -98,12 +98,14 @@
                         {% for path_outbound in paths_outbound %}
                                 <tr>
                                     <th>
-                                        {% for route in path_outbound.4 %}
-                                            {{route}}
-                                            {% if not forloop.last %}
-                                                -
-                                            {% endif %}
-                                        {% endfor %}
+                                        <p onclick="setOutbound(event)" id={{forloop.counter}}>
+                                            {% for route in path_outbound.4 %}
+                                                {{route}}
+                                                {% if not forloop.last %}
+                                                    -
+                                                {% endif %}
+                                            {% endfor %}
+                                        </p>
                                     </th>
                                     <th>{{path_outbound.0}}</th>
                                     <th>{{path_outbound.1}}</th>
@@ -151,12 +153,11 @@
                         {% for path_outbound in paths_return %}
                             <tr>
                                 <th>
-                                    {% for route in path_outbound.4 %}
-                                        {{route}}
-                                        {% if not forloop.last %}
-                                            -
-                                        {% endif %}
-                                    {% endfor %}
+                                    <p onclick="setReturn(event)" id={{forloop.counter}}>
+                                        {% for route in path_outbound.4 %}
+                                            {{route}}{% if not forloop.last %}-{% endif %}
+                                        {% endfor %}
+                                    </p>
                                 </th>
                                 <th>{{path_outbound.1}}</th>
                                 <th>{{path_outbound.0}}</th>
@@ -177,7 +178,18 @@
                     </tbody>
                </table>
         </form>
-
+        <form method="post" action="{% url 'book_redirect' %}">
+            <input type="text" class="" name="depart" value="" id="depart_redirect">
+            <p>Маршрут отправления</p>
+            {% if paths_return %}
+                <input type="text" class="" name="return" value="" id="return_redirect">
+                <p>Display three days before and after</p>
+            {% endif %}
+            {% if fly_class %}
+                <input type="text" class="visual-none" name="fly_class" value={{fly_class}}>
+            {% endif %}
+            <button id="bookFlights">Apply</button>
+        </form>
     </div>
     
     
@@ -227,6 +239,14 @@
         }
 
         document.getElementById('changeFlights').addEventListener('click', applyFilters);
+
+        function setOutbound(event){
+            document.getElementById('depart_redirect').value = event.target.textContent.split(' ').filter(item => item!='' && item!='\n').map(item => parseInt(item.trim(), 10)).filter(item => !isNaN(item))
+        }
+
+        function setReturn(event){
+            document.getElementById('return_redirect').value = event.target.textContent.split(' ').filter(item => item!='' && item!='\n').map(item => parseInt(item.trim(), 10)).filter(item => !isNaN(item))
+        }
 
     </script>
 

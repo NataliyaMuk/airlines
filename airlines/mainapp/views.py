@@ -700,11 +700,8 @@ def search_flights(request):
     airports = Airports.objects.all()
     if request.method == "POST":
         # print("HOHOHO")
-        print("request.POST[display_three_days_outbound_checkbox]",
-              request.POST.get('display_three_days_return_checkbox'))
         all_ways = search_path(request, int(request.POST['arrival_airport']), int(request.POST['departure_airport']))
         delta = datetime.timedelta(weeks=0, days=3, hours=0, seconds=0)
-        print("delta", type(delta))
         # print(all_ways)
         # print("LEN:",len(all_ways))
 
@@ -717,7 +714,6 @@ def search_flights(request):
             end_data_outbound = datetime.datetime.strptime(request.POST['outbound'], '%Y-%m-%d') + delta
         else:
             data_outbound = request.POST['outbound']
-            print("data_outbound", data_outbound)
 
         if str(request.POST.get('display_three_days_return_checkbox')) == "yes":
             delta = datetime.timedelta(weeks=0, days=3, hours=0, seconds=0)
@@ -725,7 +721,6 @@ def search_flights(request):
             end_data_return = datetime.datetime.strptime(request.POST['return'], '%Y-%m-%d') + delta
         else:
             data_return = request.POST['return']
-            print("data_return", data_return)
 
         paths_return = []
         paths_outbound = []
@@ -751,7 +746,7 @@ def search_flights(request):
                             # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
                             parsed_way[1] += way[5] * float(request.POST['fly_class'])
                             parsed_way[1] = round(parsed_way[1], 1)
-                            print("parsed_way[1]", parsed_way[1])
+                            # print("parsed_way[1]", parsed_way[1])
                         parsed_ways.extend(parsed_way)
                         parsed_ways.append(len(ways))
                         paths_outbound.append(parsed_ways)
@@ -794,10 +789,10 @@ def search_flights(request):
                             parsed_way = [[], 0, []]
                             for way in ways:
                                 # print("way[0]",way[0])
-                                print("way[0]", way[0])
+                                # print("way[0]", way[0])
                                 parsed_way[0].append(way[0])
                                 # print("way[-1]",way[7])
-                                print("way[7]", way[-1])
+                                # print("way[7]", way[-1])
                                 parsed_way[2].append(way[7])
                                 # print("int(request.POST['fly_class']",request.POST['fly_class'])
                                 # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
@@ -829,7 +824,7 @@ def search_flights(request):
         # print("paths_return:",paths_return)
         # print("paths_outbound:",paths_outbound)
         context = {'airports': airports, 'paths_outbound': paths_outbound,
-                   "paths_return": paths_return}  # 'outbound_flight ':outbound_flight ,'return_flight ':return_flight
+                   "paths_return": paths_return,"fly_class":request.POST['fly_class']}  # 'outbound_flight ':outbound_flight ,'return_flight ':return_flight
         return render(request, 'search_flights.html', context)
     else:
         context = {'airports': airports}
@@ -840,4 +835,56 @@ def search_flights(request):
 def booking_confirmation(request):
     context = {}  # 'files': [shedules] ,
     # 'readers':["readers"] }
+    return render(request, 'booking_confirmation.html', context)
+
+@csrf_exempt
+def book_redirect(request):
+    departAirs = request.POST.get('depart').split(',')
+    returnAirs = request.POST.get('return').split(',')
+
+    fly_class = request.POST.get('fly_class')
+    if fly_class == "1":
+        fly_class = "Economy"
+    elif fly_class == "1.3":
+        fly_class = "Business"
+    else:
+        fly_class = "Business"
+
+
+    departWays = []
+    returnWays = []
+
+    cursor = connection.cursor()
+    for departAir in departAirs:
+        cursor.execute("SELECT * FROM `schedules` WHERE id = %s", [int(departAir)])
+        way = cursor.fetchall() 
+        cursor.execute("SELECT `IATACode` FROM `airports` WHERE id in (SELECT `DepartureAirportID` FROM `routes` WHERE id = %s)", [way[0][4]])
+        airpots = cursor.fetchall()
+        airpots = list(airpots)
+        cursor.execute("SELECT `IATACode` FROM `airports` WHERE id in (SELECT `ArrivalAirportID` FROM `routes` WHERE id = %s)", [way[0][4]])
+        airpots2 = list(cursor.fetchall())
+        airpots.extend(airpots2)
+        way = list(way)
+        way[0] = list(way[0])
+        way[0].extend(airpots)
+        departWays.append(way[0])
+    
+    if returnAirs:
+        for returnAir in returnAirs:
+            cursor.execute("SELECT * FROM `schedules` WHERE id = %s", [int(returnAir)])
+            way = cursor.fetchall() 
+            cursor.execute("SELECT `IATACode` FROM `airports` WHERE id in (SELECT `DepartureAirportID` FROM `routes` WHERE id = %s)", [way[0][4]])
+            airpots = cursor.fetchall()
+            airpots = list(airpots)
+            cursor.execute("SELECT `IATACode` FROM `airports` WHERE id in (SELECT `ArrivalAirportID` FROM `routes` WHERE id = %s)", [way[0][4]])
+            airpots2 = list(cursor.fetchall())
+            airpots.extend(airpots2)
+            way = list(way)
+            way[0] = list(way[0])
+            way[0].extend(airpots)
+            returnWays.append(way[0])
+
+    print('departWays',departWays)
+    print('returnWays',returnWays)
+    context = {'departWays': departWays,"returnWays":returnWays,"fly_class":fly_class}
     return render(request, 'booking_confirmation.html', context)
