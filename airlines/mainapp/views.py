@@ -407,16 +407,16 @@ def question_search_data(question, model_name, selected_age, selected_gender):
         if (selected_age):
             if (selected_age == '18'):
                 count_total = \
-                getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(
-                    count_total=Count(question))['count_total']
+                    getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(
+                        count_total=Count(question))['count_total']
             if (selected_age == '25'):
                 count_total = \
-                getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(
-                    count_total=Count(question))['count_total']
+                    getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(
+                        count_total=Count(question))['count_total']
             if (selected_age == '40'):
                 count_total = \
-                getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(
-                    count_total=Count(question))['count_total']
+                    getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(
+                        count_total=Count(question))['count_total']
             if (selected_age == '60'):
                 count_total = getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(
                     count_total=Count(question))['count_total']
@@ -448,28 +448,31 @@ def question_search_data(question, model_name, selected_age, selected_gender):
 
         else:
             count_total = \
-            getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))[
-                'count_total']
+                getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))[
+                    'count_total']
         # count_total = getattr(models, model_name).objects.filter(**{question: i}).aggregate(count_total=Count(question))['count_total']
 
         count_male = \
-        getattr(models, model_name).objects.filter(**{question: i}, gender="M").aggregate(count_male=Count("gender"))[
-            'count_male']
+            getattr(models, model_name).objects.filter(**{question: i}, gender="M").aggregate(
+                count_male=Count("gender"))[
+                'count_male']
         count_female = \
-        getattr(models, model_name).objects.filter(**{question: i}, gender="F").aggregate(count_female=Count("gender"))[
-            'count_female']
+            getattr(models, model_name).objects.filter(**{question: i}, gender="F").aggregate(
+                count_female=Count("gender"))[
+                'count_female']
         count_age18_24 = \
-        getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(
-            count_age18_24=Count('age'))['count_age18_24']
+            getattr(models, model_name).objects.filter(**{question: i}, age__gte=18, age__lte=24).aggregate(
+                count_age18_24=Count('age'))['count_age18_24']
         count_age25_39 = \
-        getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(
-            count_age25_39=Count('age'))['count_age25_39']
+            getattr(models, model_name).objects.filter(**{question: i}, age__gte=25, age__lte=39).aggregate(
+                count_age25_39=Count('age'))['count_age25_39']
         count_age40_59 = \
-        getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(
-            count_age40_59=Count('age'))['count_age40_59']
+            getattr(models, model_name).objects.filter(**{question: i}, age__gte=40, age__lte=59).aggregate(
+                count_age40_59=Count('age'))['count_age40_59']
         count_age60 = \
-        getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(count_age60=Count('age'))[
-            'count_age60']
+            getattr(models, model_name).objects.filter(**{question: i}, age__gte=60).aggregate(
+                count_age60=Count('age'))[
+                'count_age60']
         count_economy = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Economy").aggregate(
             count_economy=Count("cabintype"))['count_economy']
         count_business = getattr(models, model_name).objects.filter(**{question: i}, cabintype="Business").aggregate(
@@ -841,3 +844,8 @@ def booking_confirmation(request):
     context = {}  # 'files': [shedules] ,
     # 'readers':["readers"] }
     return render(request, 'booking_confirmation.html', context)
+
+
+def short_summary(request):
+    context = {}
+    return render(request, 'short_summary.html', context)

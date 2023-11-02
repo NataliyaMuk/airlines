@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/report_amonities.css' %}">{% endblock style %}
+
+{% block content %}
+    <div class="content">
+            <h1 class="manage-flights__heading">Amenities report</h1>
+            <hr size="2.5" color="black">
+        <form action="{% url 'report_amonities' %}" method="post" enctype="multipart/form-data">
+                <div class="input__container">
+                        <div class="select__or__input__container">
+                            <label for="flightID">Flight ID:</label>
+                            <input type="text" id="flightID"/>
+
+                            <label for="From">from:</label>
+                            <input type="text" id="From"/>
+
+                            <label for="to">to:</label>
+                            <input type="date" id="to"/>
+
+                        <button id="MakeReportButton">Make Report</button>
+                        </div>
+                </div>
+            <table class="manage-flights__table" border="1" id="tableOfUsersAdminPage">
+                <thead>
+                    <tr>
+                        <th>Amenities</th>
+                        <th>Wi-fi 50mb</th>
+                        <th>Extra Blanket</th>
+                        <th>Two Neighboring Seats Free</th>
+                        <th>Laptop Rental</th>
+
+                    </tr>
+                </thead>
+                <tbody  id="tbodyAdminTableUsers">
+                    {% for schedule in schedules %}
+                    <tr
+                        {% if schedule.Confirmed == 0 %}style="background-color: #eb6565;"{% endif %}>
+                             <td>#</td>
+                            <td>#</td>
+                            <td>#</td>
+                            <td>#</td>
+                            <td>#</td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+
+        </form>
+    </div>
+
+
+{% endblock %}

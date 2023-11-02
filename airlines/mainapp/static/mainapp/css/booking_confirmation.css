@@ -1,0 +1,80 @@
+.manage-flights__heading {
+    font-weight: 100;
+    font-size: medium;
+    margin-left: 10px;
+}
+
+button {
+    background-color: white;
+    border: 1px solid;
+    width: 130px;
+    padding: 4px;
+}
+
+.content {
+    border: 2px solid;
+    margin: 0 auto;
+    width: 900px;
+    padding-bottom: 30px;
+}
+
+.manage-flights__heading-link {
+    font-weight: 100;
+    font-size: medium;
+    color: black;
+    margin-left: 10px;
+}
+
+.manage-flights__select-office {
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+}
+
+.manage-flights__office-text {
+    margin-right: 10px;
+}
+
+.manage-flights__table {
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.visual-none{
+    display: none;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.fieldset__filter {
+    margin: 0 auto;
+    width: 750px;
+    margin-bottom: 30px;
+}
+
+.filter__container__object {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.filter__container {
+    flex-direction: column;
+    display: flex;
+}
+
+.select__or__input__container {
+    display: inline-flex;
+}
+
+.text__without__padding_margin {
+    padding: 0px;
+    margin: 0px;
+    margin-right: 6px;
+}
+
+.enable-disable-flight-btn {
+    margin-left: 53px;
+}

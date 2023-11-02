@@ -2,7 +2,7 @@ from django.urls import path, include
 
 from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, add_file_form, \
     manage_flights, update_confirmation, search_flights, search_path, view_reports_summary, view_reports_detailed, \
-    booking_confirmation
+    booking_confirmation, short_summary
 
 from django.views.generic import TemplateView
 from airlines import settings
@@ -27,6 +27,7 @@ urlpatterns = [
     path('reports_summary/', view_reports_summary, name='reports_summary'),
     path('reports_detailed/', view_reports_detailed, name='reports_detailed'),
     path('book_confirmation/', booking_confirmation, name='book_confirmation'),
+    path('short_summary/', short_summary, name='short_summary'),
 ]
 
 if settings.DEBUG:
