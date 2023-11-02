@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+        <form method="post" action="{% url 'book_confirmation' %}">
+            <label for="Booking">Booking reference:</label>
+            <input type="text" id="booking"/>
+            <button id="booking_button">OK</button>
+            <fieldset class="fieldset__outbound">
+                <legend>Flight list</legend>
+                <div class="Outbound__container">
+                    <div class="Outbound__container__object">
+                        <label for="Booking">Choose your flights:</label>
+                        <select id="flights-select" name='flights'>
+                                <option value="1" class="visual-none">#</option>
+                        </select>
+                        <button id="show_amenities_button">Show Amenities</button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="Output__container__object">
+                        <div style="display: inline-block;">Full name: </div>
+                        <div style="display: inline-block;">Passport Number: </div>
+                        <div style="display: inline-block;">Your cabin class is: </div>
+            </div>
+
+
+
+        <fieldset class="fieldset__filter">
+                <legend>Passenger details</legend>
+                <div class="filter__container">
+                        <div class="select__or__input__container">
+                            <label for="SoftDrinks">Soft Drinks (Free)</label>
+                            <input type="checkbox" id="SoftDrinks"/>
+
+                            <label for="Wi-fi_50">Wi-Fi 50Mb (Free)</label>
+                            <input type="checkbox" id="Wi-fi_50"/>
+
+                            <label for="NextSeatFree">Next Seat Free ($30)</label>
+                            <input type="checkbox" id="NextSeatFree"/>
+
+                            <label for="Wi-fi_250">Wi-Fi 250Mb ($50)</label>
+                            <input type="checkbox" id="Wi-fi_250"/>
+
+                            <label for="ExtraBag">Extra Bag ($15)</label>
+                            <input type="checkbox" id="ExtraBag"/>
+
+                            <label for="LaptopRental">Laptop Rental ($15)</label>
+                            <input type="checkbox" id="LaptopRental"/>
+
+                        </div>
+
+                </div>
+            </fieldset>
+            <div class="Down_Output__container__object">
+                        <div style="display: inline-block;">Items Selected: </div>
+                        <div style="display: inline-block;">Duties: </div>
+                        <div style="display: inline-block;">Total payable: </div>
+            </div>
+            <button id="save_and_confirm_button">Save and Confirm</button>
+            <button id="exit_button">Exit</button>
+        </form>
+
+
+
+
+{% endblock %}
