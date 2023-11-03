@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+<!-- 
+{% load static %}
+
+{% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/search-flights.css' %}">{% endblock style %} -->
+
+
+{% block content %}
+    <form method="post" action="{% url 'confirmation_payment' %}">
+        COSTS:{{costs}}
+        <input type="text" class="visual-none" name="status" value={{status}}>
+        <input type="text" class="visual-none" name="depart" value={{depart}}>
+        <input type="text" class="visual-none" name="return" value={{return}}>
+        <input type="text" class="visual-none" name="users" value={{users}}>
+        <input type="text" class="visual-none" name="fly_class" value={{fly_class}}>
+        <input type="costs" class="visual-none" name="fly_class" value={{costs}}>
+        <button>Confim payment</button>
+    </form>
+{% endblock %}

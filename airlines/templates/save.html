@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+<!-- {% extends 'base.html' %}
 
 {% load static %}
 {% block style %}<link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/search-flights.css' %}">{% endblock style %}
@@ -60,9 +60,10 @@
 
                             <label for="Lastname">Passport country</label>
                             <select id="cabin-type-select" name='fly_class'>
-                                {% for name in names %}
-                                    <option value={{name.0}} >{{name.0}}</option>
-                                {% endfor %}
+                                <option value="1" class="visual-none">Economy</option>
+                                <option value="1" >Economy</option>
+                                <option value="1.3">Business</option>
+                                <option value="1.755">First Class</option>
                             </select>
 
                             <label for="telephone">Phone</label>
@@ -103,21 +104,14 @@
                 </tr>
             </template>
             <button id="deleteUser" onclick="delete_user(event)">Delete passenger</button>
-            <form method="post" action="{% url 'confirmation_payment' %}">
-                <input type="text" class="visual-none" name="cost_depart" value={{cost_depart}}>
-                <input type="text" class="visual-none" name="cost_return" value={{cost_return}}>
-                <input type="text" class="visual-none" id="users" name="users">
-                <input type="text" class="visual-none" name="depart" value={{depart}}>
-                <input type="text" class="visual-none" name="return" value={{return}}>
-                <input type="text" class="visual-none" name="fly_class" value={{fly_class}}>
-                <input type="text" class="visual-none" name="status" value="0">
-                <button>Confim booking</button>
+            <form action="">
+                <!-- невидимая форма тут для 3.5 -->
+                <!-- <button>Confim booking</button>
             </form>
             
         </form>
     <script>
         // добавить логику для невидимой формы и перехода на 3.5
-        massiv = []
         counter = 0
         function add_user(event){
 
@@ -150,11 +144,6 @@
 
             var table = document.getElementById('tableOfUsersAdminPage');
 
-            massiv.push([firstname,lastname,dateSelect,passportNumber,text,telephoneNumber,"/"])
-            document.getElementById('users').value = massiv
-
-            console.log("massiv",massiv)
-
             table.appendChild(newRow);
         }
         
@@ -163,12 +152,8 @@
             var thElements = table.querySelectorAll('tr');
             if (thElements.length != 1){
                 table.removeChild(table.lastChild);
-                if (thElements.length > table.querySelectorAll('tr').length){
-                    massiv.splice(-1)
-                    document.getElementById('users').value = massiv
-                }
             }
         }
     </script> 
 {% endblock %}
- 
+--> 

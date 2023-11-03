@@ -24,6 +24,9 @@ from django.db.models import Count
 
 from mainapp import models
 
+import random
+import string
+
 
 def user_session(request, email):
     cursor = connection.cursor()
@@ -886,5 +889,54 @@ def book_redirect(request):
 
     print('departWays',departWays)
     print('returnWays',returnWays)
-    context = {'departWays': departWays,"returnWays":returnWays,"fly_class":fly_class}
+    cursor.execute("SELECT Name FROM `countries`")
+    names = cursor.fetchall()
+    print("names",names)
+    context = {'departWays': departWays,"returnWays":returnWays,"fly_class":fly_class,"names":names,"cost_depart":request.POST['cost_depart'],"cost_return":request.POST['cost_return'],"depart":request.POST.get('depart'),"return":request.POST.get('return')}
     return render(request, 'booking_confirmation.html', context)
+
+def generate_key(length=6):
+    characters = string.ascii_letters + string.digits
+    unique_string = ''.join(random.choice(characters) for _ in range(length))
+    cursor.execute("SELECT `BookingReference` FROM `tickets`")
+    keys = list(cursor.fetchall())
+    if unique_string not in keys:
+        return unique_string
+    else:
+        unique_string = generate_key(length=6)
+        return unique_string
+
+
+@csrf_exempt
+@admin_required
+def confirmation_payment(request):
+    status = request.POST['status']
+    if status == "1":
+        departAirs = request.POST.get('depart').split(',')
+        returnAirs = request.POST.get('return').split(',')
+        users = request.POST['users'].split(',/')
+        customers = []
+        for user in users:
+            customer = user.split(',')
+            if customer[0] == "":
+                customer.pop(0)
+            if len(customer) < 2:
+                continue
+            print("customer",customer)
+            customers.append(customer)
+        for customer in customers:
+            for departAir in departAirs:
+                key = generate_key()
+                cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Email`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT * FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,%s,(SELECT * FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],request.user.email,customer[5],customer[3],customer[4],customer[4],key])
+            if returnAirs:
+                for returnAir in returnAirs:
+                    key = generate_key()
+                    cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Email`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT * FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,%s,(SELECT * FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],request.user.email,customer[5],customer[3],customer[4],customer[4],key])
+        print("customers",customers)
+        context = {}
+        return render(request, 'confirmation_payment.html', context)
+    users = request.POST['users'].split(',/')
+    costs = len(users) * float(request.POST['cost_depart']) + len(users) * float(request.POST['cost_return'])
+    print(users)
+    context = {"costs":costs,"status":"1","depart":request.POST.get('depart'),"return":request.POST.get('return'),"users":request.POST['users'],"fly_class":request.POST['fly_class']}
+    return render(request, 'confirmation_payment.html', context)

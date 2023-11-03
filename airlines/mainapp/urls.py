@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, add_file_form,manage_flights, update_confirmation, search_flights, search_path, view_reports_summary, view_reports_detailed,booking_confirmation,book_redirect
+from .views import user_session, admin_home, user_home, login_redirect, update_active, logout_redirect, add_file_form,manage_flights, update_confirmation, search_flights, search_path, view_reports_summary, view_reports_detailed,booking_confirmation,book_redirect,confirmation_payment
 
 from django.views.generic import TemplateView
 from airlines import settings
@@ -26,6 +26,7 @@ urlpatterns = [
     path('reports_detailed/', view_reports_detailed, name='reports_detailed'),
     path('book_confirmation/', booking_confirmation, name='book_confirmation'),
     path('book_redirect/', book_redirect, name='book_redirect'),
+    path('confirmation_payment/', confirmation_payment, name='confirmation_payment')
     
 ]
 
