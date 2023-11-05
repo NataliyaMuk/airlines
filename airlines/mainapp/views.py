@@ -28,7 +28,7 @@ import random
 import string
 
 
-def user_session(request, email):
+def user_session(request, email, user_id):
     cursor = connection.cursor()
     # cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,1,NOW(),'Connection lost.',0)")
     # cursor.execute("UPDATE `mainapp_sessions` SET `last_confirmation`= '04041900' JOIN mainapp_users ON mainapp_users.id = mainapp_sessions.user_id  WHERE mainapp_users.Email = `j.doe@amonic.com`  and  mainapp_sessions.status = `0`')")
@@ -41,6 +41,14 @@ def user_session(request, email):
         cursor.execute(
             "UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE mainapp_sessions.status='0' and (SELECT id FROM mainapp_users WHERE email = %s) = user_id",
             [email])
+        
+        print("user",user_id)
+        cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s AND status = 0",[user_id])
+        sessions = cursor.fetchall()
+        print("sessions",sessions)
+        if sessions == ():
+            print("YSE")
+            cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`,`last_confirmation`, `error_status`, `status`) VALUES (NULL,%s,NOW(),NOW(),'Connection lost.',0)",[user_id])
 
 
 class CustomLoginView(LoginView):
@@ -78,7 +86,7 @@ def login_redirect(request):
     cursor.execute(
         "UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE TIMESTAMPDIFF(SECOND,last_confirmation,NOW()) > 120 and status='0'")
     cursor.execute(
-        "INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`, `error_status`, `status`) VALUES (NULL,%s,NOW(),'Connection lost.',0)",
+        "INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`,`last_confirmation`, `error_status`, `status`) VALUES (NULL,%s,NOW(),NOW(),'Connection lost.',0)",
         [request.user.id])
 
     if request.user.RoleID.Title == "Administrator":
@@ -931,7 +939,7 @@ def confirmation_payment(request):
             if returnAirs:
                 for returnAir in returnAirs:
                     key = generate_key()
-                    cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Email`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT * FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,%s,(SELECT * FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],request.user.email,customer[5],customer[3],customer[4],customer[4],key])
+                    cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Email`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT * FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,%s,(SELECT * FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(returnAir),request.POST['fly_class'],customer[0],customer[1],request.user.email,customer[5],customer[3],customer[4],customer[4],key])
         print("customers",customers)
         context = {}
         return render(request, 'confirmation_payment.html', context)

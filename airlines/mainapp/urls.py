@@ -14,7 +14,7 @@ urlpatterns = [
     path('logout_redirect/', logout_redirect),
     path('', TemplateView.as_view(template_name="home.html"), name='home'),
     # path('register/', register, name='register'),
-    path('user-session/<str:email>', csrf_exempt(user_session), name='user-session/'),
+    path('user-session/<str:email>/<int:user_id>', csrf_exempt(user_session), name='user-session/'),
     path('home_admin/', admin_home, name='home_admin'),
     path('home_user/', user_home, name='home_user'),
     path('login_redirect/', login_redirect, name='login_redirect'),

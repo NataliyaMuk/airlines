@@ -26,15 +26,31 @@
             <a href="{% url 'reports_summary' %}">Отчеты</a>
         </li>
     </ul>
-
+    <p class="visually-hidden" id="user_id">{{user.id}}</p>
     {% block content %}
     {% endblock %}
 </body>
 </html>
 
+<style>
+    .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+}
+</style>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
 <script>
+    user_id
     dac = document.getElementById('user').textContent
-    setInterval(()=>{axios.get(`http://127.0.0.1:8000/user-session/${dac.slice(19)}`)} , 60000);
+    id = document.getElementById('user_id').textContent
+    setInterval(()=>{axios.get(`http://127.0.0.1:8000/user-session/${dac.slice(19)}/${id}`)} , 60000);
 </script>
 
