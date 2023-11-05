@@ -15,7 +15,7 @@
                 <legend>Search Parameters</legend>
                 <div class="filter__container">
                     <div class="filter__container__object">
-                        <select id="departure-airport-select" name='departure_airport'>
+                        <select id="departure-airport-select" name='departure_airport' required>
                             <option value="0" class="visual-none">From</option>
                             <option value="0" >From</option>
                             {% for airport in airports %}
@@ -49,16 +49,16 @@
 
                     <div class="filter__container__object">
                         <div class="select__or__input__container">
-                            <input type="radio" id="pathChoice1" name="path" value="email" />
+                            <input type="radio" id="pathChoice1" name="path" value="email" required/>
                             <label for="pathChoice1">Return</label>
 
-                            <input type="radio" id="pathChoice2" name="path" value="phone" />
+                            <input type="radio" id="pathChoice2" name="path" value="phone" required/>
                             <label for="pathChoice2">One way</label>
                         </div>
 
                         <div class="select__or__input__container">
                             <p class="text__without__padding_margin">Outbound</p>
-                            <input type="date" id="date-select" name="outbound">
+                            <input type="date" id="date-select" name="outbound" required>
                         </div>
 
                         <div class="select__or__input__container">
@@ -201,6 +201,28 @@
 
 
     <script>
+        
+        document.getElementById('date-select').addEventListener('change', checkDate);
+        document.getElementById('date-return-select').addEventListener('change', checkDate);
+
+        function checkDate(event) {
+
+            const dateSelect = document.getElementById('date-select').value;
+            const dateReturnSelect = document.getElementById('date-return-select').value;
+
+
+            if (dateSelect && dateReturnSelect) {
+
+                const dateOutbound = new Date(dateSelect);
+                const dateReturn = new Date(dateReturnSelect);
+
+                if (dateOutbound >= dateReturn) {
+                document.getElementById('date-select').value = '';
+                alert('Дата вылета должна быть меньше даты возврата');
+                }
+            }
+            }
+
         function applyFilters() {
             var departureAirport = document.getElementById('departure-airport-select').value;
             var arrivalAirport = document.getElementById('arrival-airport-select').value;
