@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block style %}
+    <link type="text/css" rel="stylesheet" href="{% static 'mainapp/css/short_summary.css' %}">
+{% endblock style %}
+
+{% block content %}
+    <div class="content">
+
+            <h1 class="summary__heading">AMONIC Airlines Short Summary</h1>
+            <hr size="2.5" color="black">
+            <form action="{% url 'short_summary' %}" method="post" enctype="multipart/form-data">
+                <img src="{% static 'mainapp/img/logo.png' %}" alt="logo">
+                <div class="main-content">
+                    <div class="item">Div 1</div>
+                    <div class="item">Div 2</div>
+                    <div class="item">Div 3</div>
+                    <div class="item">Div 44</div>
+                </div>
+
+            </form>
+    </div>
+
+
+{% endblock %}

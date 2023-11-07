@@ -957,3 +957,16 @@ def confirmation_payment(request):
     print(users)
     context = {"costs":costs,"status":"1","depart":request.POST.get('depart'),"return":request.POST.get('return'),"users":request.POST['users'],"fly_class":request.POST['fly_class']}
     return render(request, 'confirmation_payment.html', context)
+
+
+def short_summary(request):
+    context = {}
+    return render(request, 'short_summary.html', context)
+
+def extra_amenities(request):
+    context = {}
+    return render(request, 'extra_amenities.html', context)
+
+def report_amonities(request):
+    context = {}
+    return render(request, 'report_amonities.html', context)

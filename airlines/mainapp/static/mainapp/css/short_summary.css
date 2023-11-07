@@ -1,0 +1,71 @@
+.summary__heading {
+    border: 2px solid;
+    margin: 0 auto;
+    width: 1200px;
+    padding-bottom: 30px;
+    /* padding-right: 70px;
+    padding-left: 70px; */
+}
+
+.link_with_margin{
+    margin-right:10px;
+    margin-left:10px;
+    color: black;
+}
+
+.content {
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr ;
+    gap: 10px; /* промежуток между элементами */
+    border: 1px solid black; /* оконтовка */
+    padding: 10px;
+}
+
+.item {
+    background-color: lightgray;
+    padding: 20px;
+    border: 1px solid black;
+}
+
+.report__heading{
+    margin-left:10px;
+    font-weight: 100;
+    font-size: medium;
+}
+
+.reports__table {
+    margin: 0 auto;
+    margin-bottom: 20px;
+    border: 2px solid black;
+    border-collapse: separate;
+}
+
+th { 
+    border: 1px solid black; /* Граница вокруг ячеек */
+}
+
+td{ 
+    border: 1px solid black; /* Граница вокруг ячеек */
+}
+
+.td-none{
+    border:0px;
+}
+
+.table__text__content td{
+    border: 1px solid rgb(255, 255, 255);
+}
+
+.question {
+    font-weight: bolder;
+}
+
+select {
+    margin-left: 78px;
+    margin-bottom: 15px;
+}
