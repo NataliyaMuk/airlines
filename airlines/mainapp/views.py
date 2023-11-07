@@ -960,6 +960,22 @@ def confirmation_payment(request):
 
 
 def short_summary(request):
+    sql requests
+    ....... для полетов статистика
+    SELECT COUNT(tickets.id) FROM `tickets` WHERE tickets.Confirmed = 1 AND (SELECT schedules.Date FROM `schedules` WHERE schedules.id = tickets.ScheduleID) >= (DATE("2017-10-25")- INTERVAL 1 MONTH) запрос количество билетов подтвержденных за месяц.
+    SELECT COUNT(tickets.id) FROM `tickets` WHERE tickets.Confirmed = 0 AND (SELECT schedules.Date FROM `schedules` WHERE schedules.id = tickets.ScheduleID) >= (DATE("2017-10-25")- INTERVAL 1 MONTH) запрос количество билетов отменненных за месяц.
+    SELECT routes.FlightTime FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id JOIN routes ON schedules.RouteID = routes.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) время перелета для дальнейшего среднего подсчета.
+    ....... для определения нагруженности дней
+    SELECT COUNT(tickets.id),schedules.Date as d FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY schedules.Date ORDER BY COUNT(tickets.id) DESC LIMIT 1 день с максимальным количеством пассажиров
+    SELECT COUNT(tickets.id),schedules.Date as d FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY schedules.Date ORDER BY COUNT(tickets.id) LIMIT 1 день с минимальным количеством пассажиров
+    ....... для топа покупателей
+    SELECT COUNT(tickets.id),tickets.Firstname FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY tickets.Firstname ORDER BY COUNT(tickets.id) DESC количество билетов за месяц у человека по имени
+    SELECT COUNT(tickets.id),PassportNumber FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY tickets.PassportNumber ORDER BY COUNT(tickets.id) DESC  второй вариант с сортировкой по номеру паспорта
+    ....... топ аэропортов
+    SELECT COUNT(tickets.id),airports.IATACode FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id JOIN routes ON schedules.RouteID = routes.id JOIN airports ON routes.DepartureAirportID = airports.ID WHERE schedules.Date >= (DATE("2017-06-25")- INTERVAL 1 MONTH) GROUP BY airports.IATACode ORDER BY COUNT(tickets.id) DESC
+    ....... топ продаж по дням
+    SELECT COUNT(tickets.CabinTypeID),tickets.CabinTypeID FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id  WHERE schedules.Date = (DATE("2017-10-05")- INTERVAL 1 DAY) GROUP BY tickets.CabinTypeID
+    
     context = {}
     return render(request, 'short_summary.html', context)
 
