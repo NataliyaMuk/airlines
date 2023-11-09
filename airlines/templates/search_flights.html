@@ -180,6 +180,8 @@
         </form>
         {% if paths_outbound %}
         <form method="post" action="{% url 'book_redirect' %}">
+            <fieldset class="fieldset__filter">
+                <legend>Confirm booking for</legend>
             <input type="text" class="" name="depart" value="" id="depart_redirect">
             <input type="text" class="visual-none" id="cost_depart" name="cost_depart">
             <p>Маршрут отправления</p>
@@ -193,6 +195,7 @@
             {% endif %}
                 
             <button id="bookFlights">Apply</button>
+            </fieldset>
         </form>
         {% endif %}
     </div>
