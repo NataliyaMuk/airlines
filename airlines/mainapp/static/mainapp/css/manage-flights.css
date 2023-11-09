@@ -78,3 +78,7 @@ button {
 .enable-disable-flight-btn {
     margin-left: 53px;
 }
+
+.import-btn{
+    position: right;
+}
