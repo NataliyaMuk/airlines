@@ -54,3 +54,43 @@
   border: 0;
   clip: rect(0 0 0 0);
 }
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+a:hover {
+  color: #666;
+}
+
+#user {
+  font-weight: bold;
+}
+
+.visually-hidden {
+  display: none;
+}
