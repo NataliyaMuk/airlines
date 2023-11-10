@@ -7,7 +7,24 @@
 
 {% block content %}
     <form method="post" action="{% url 'confirmation_payment' %}">
-        COSTS:{{costs}}
+        <fieldset class="fieldset__filter">
+            <legend>Billing confirmation</legend>
+            <p>Total amount: $COSTS:{{costs}}</p>
+        <p>Paid using:</p>
+        <div class="radio-btns">
+            <input type="radio" id="creditCard" name="paymentMethod" value="creditCard">
+            <label for="creditCard">Credit Card</label><br>
+
+            <input type="radio" id="cash" name="paymentMethod" value="cash">
+            <label for="cash">Cash</label><br>
+
+            <input type="radio" id="voucher" name="paymentMethod" value="voucher">
+            <label for="voucher">Voucher</label><br>
+        </div>
+        <button id="issue-btn" onclick="delete_user(event)">Issue tickets</button>
+        <button id="cancel-btn" onclick="delete_user(event)">Cancel</button>
+        </fieldset>
+        
         <input type="text" class="visual-none" name="status" value={{status}}>
         <input type="text" class="visual-none" name="depart" value={{depart}}>
         <input type="text" class="visual-none" name="return" value={{return}}>
