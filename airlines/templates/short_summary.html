@@ -18,45 +18,46 @@
                         <legend>Flights</legend>
                         <div class="flight__container">
                                 <div class="Number_confirmed_container">
-                                    <p class="Number_confirmed_margin">Number confirmed: <span id="Number_confirmed">#</span></p>
+                                    <p class="Number_confirmed_margin">Number confirmed: <span id="Number_confirmed">{{conf_tickets.0.0}}</span></p>
                                 </div>
                                 <div class="Number_cancelled_container">
-                                    <p class="Number_cancelled_margin">Number cancelled: <span id="Number_cancelled">#</span></p>
+                                    <p class="Number_cancelled_margin">Number cancelled: <span id="Number_cancelled">{{reduse_tickets.0.0}}</span></p>
                                 </div>
                                 <div class="Average_flight_container">
-                                    <p class="Average_flight_margin">Average daily flight time: <span id="Average_flight">#</span> minutes</p>
+                                    <p class="Average_flight_margin">Average daily flight time: <span id="Average_flight">{{summa}}</span> minutes</p>
                                 </div>
                         </div>
                     </fieldset>
                     <fieldset class="fieldset__Customers">
                         <legend>Top Customers (Number of purchaces)</legend>
                         <div class="Customers__container">
-                                <div class="Customer_container">
-                                    <p class="Customer_margin">John Doe: <span id="Customer_confirmed">(5 Tickets)</span></p>
-                                </div>
+                                {% for top_ticket_buyer in top_tickets_buyer%}
+                                    <div class="Customer_container">
+                                        <p class="Customer_margin">{{top_ticket_buyer.2}} {{top_ticket_buyer.3}}: <span id="Customer_confirmed">({{top_ticket_buyer.0}} Tickets)</span></p>
+                                    </div>
+                                {% endfor %}
                         </div>
                     </fieldset>
                     <fieldset class="fieldset__Passengers">
                         <legend>Number of passengers flying</legend>
                         <div class="passengers__container">
                                 <div class="Busiest_Day_container">
-                                    <p class="Busiest_Day_margin">Busiest day: <span id="Busiest_Day_Month_confirmed">#</span> with <span id="Flight_Number_busiest_confirmed">#</span> flight</p>
+                                    <p class="Busiest_Day_margin">Busiest day: <span id="Busiest_Day_Month_confirmed">{{max_pass.0.1}}</span> with <span id="Flight_Number_busiest_confirmed">{{max_pass.0.0}}</span> flight</p>
                                 </div>
                                 <div class="Most_Quiet_Day_container">
-                                    <p class="Most_Quiet_Day_margin">Most Quiet Day: <span id="Most_Quiet_Day_Month_confirmed">#</span> with <span id="Flight_Number_quiet_confirmed">#</span> flight</p>
+                                    <p class="Most_Quiet_Day_margin">Most Quiet Day: <span id="Most_Quiet_Day_Month_confirmed">{{min_pass.0.1}}</span> with <span id="Flight_Number_quiet_confirmed">{{min_pass.0.0}}</span> flight</p>
                                 </div>
                         </div>
                 </fieldset>
                 <fieldset class="fieldset__City">
                     <legend>Top AMONIC Airlines Offices (Revenue)</legend>
-                    <div class="City__container">
-                            <div class="City_container">
-                                <p class="City_margin">1. <span id="City_name">Abu Dhabi</span></p>
-                            </div>
-                            <div class="City_container">
-                                <p class="City_margin">2. <span id="City_name">Bahrain</span></p>
-                            </div>
-                    </div>
+                    <ol class="City__container">
+                            {% for top_airport in top_airports%}
+                                <li class="City_container">
+                                    <p class="City_margin"><span id="City_name">{{top_airport.1}}</span></p>
+                                </li>
+                            {% endfor %}
+                    </ol>
                 </fieldset>
             </fieldset>
 
@@ -64,20 +65,20 @@
             <fieldset class="fieldset__Revenue">
                 <legend>Revenue from ticket sales</legend>
                 <div class="Revenue__container">
-                            <p class="Yestarday_margin">Yesterday: <span id="Yestarday_name">$[#]</span></p>
-                            <p class="Two_days_margin">Two days ago: <span id="Two_days_name">$[#]</span></p>
-                            <p class="Three_days_margin">Three days ago: <span id="Three_days_name">$[#]</span></p>                   
+                            <p class="Yestarday_margin">Yesterday: <span id="Yestarday_name">${{day_sels1}}</span></p>
+                            <p class="Two_days_margin">Two days ago: <span id="Two_days_name">${{day_sels2}}</span></p>
+                            <p class="Three_days_margin">Three days ago: <span id="Three_days_name">${{day_sels3}}</span></p>                   
                 </div>
             </fieldset>
-            <fieldset class="fieldset__report">
+            <!-- <fieldset class="fieldset__report">
                 <legend>Weekly report of percentage of empty seats</legend>
                 <div class="report__container">
                             <p class="This_week_margin">This week: <span id="This_week_name">$[#]</span></p>
                             <p class="Last_week_margin">Last week: <span id="Last_week_name">$[#]</span></p>
                             <p class="Two_weeks_margin">Two weeks ago: <span id="Two_weeks_name">$[#]</span></p>
                 </div>
-            </fieldset>
-            <p class="Report_generated_margin">Report generated in  <span id="Report_generated_name">#</span> seconds</p>
+            </fieldset> -->
+            <p class="Report_generated_margin">Report generated in  <span id="Report_generated_name">{{elapsed_time}}</span> seconds</p>
             <button id="Close_buttons">Close</button>
         </fieldset> 
     </div>

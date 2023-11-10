@@ -960,24 +960,66 @@ def confirmation_payment(request):
 
 
 def short_summary(request):
-    sql requests
-    ....... для полетов статистика
-    SELECT COUNT(tickets.id) FROM `tickets` WHERE tickets.Confirmed = 1 AND (SELECT schedules.Date FROM `schedules` WHERE schedules.id = tickets.ScheduleID) >= (DATE("2017-10-25")- INTERVAL 1 MONTH) запрос количество билетов подтвержденных за месяц.
-    SELECT COUNT(tickets.id) FROM `tickets` WHERE tickets.Confirmed = 0 AND (SELECT schedules.Date FROM `schedules` WHERE schedules.id = tickets.ScheduleID) >= (DATE("2017-10-25")- INTERVAL 1 MONTH) запрос количество билетов отменненных за месяц.
-    SELECT routes.FlightTime FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id JOIN routes ON schedules.RouteID = routes.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) время перелета для дальнейшего среднего подсчета.
-    ....... для определения нагруженности дней
-    SELECT COUNT(tickets.id),schedules.Date as d FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY schedules.Date ORDER BY COUNT(tickets.id) DESC LIMIT 1 день с максимальным количеством пассажиров
-    SELECT COUNT(tickets.id),schedules.Date as d FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY schedules.Date ORDER BY COUNT(tickets.id) LIMIT 1 день с минимальным количеством пассажиров
-    ....... для топа покупателей
-    SELECT COUNT(tickets.id),tickets.Firstname FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY tickets.Firstname ORDER BY COUNT(tickets.id) DESC количество билетов за месяц у человека по имени
-    SELECT COUNT(tickets.id),PassportNumber FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE("2017-10-25")- INTERVAL 1 MONTH) GROUP BY tickets.PassportNumber ORDER BY COUNT(tickets.id) DESC  второй вариант с сортировкой по номеру паспорта
-    ....... топ аэропортов
-    SELECT COUNT(tickets.id),airports.IATACode FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id JOIN routes ON schedules.RouteID = routes.id JOIN airports ON routes.DepartureAirportID = airports.ID WHERE schedules.Date >= (DATE("2017-06-25")- INTERVAL 1 MONTH) GROUP BY airports.IATACode ORDER BY COUNT(tickets.id) DESC
-    ....... топ продаж по дням
-    SELECT COUNT(tickets.CabinTypeID),tickets.CabinTypeID FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id  WHERE schedules.Date = (DATE("2017-10-05")- INTERVAL 1 DAY) GROUP BY tickets.CabinTypeID
+    start_time = datetime.datetime.now()
+
+    def count_price(mass):
+        price = 0
+        for item in mass:
+            if item[1] == 2:
+                price =float(price) + float(item[0])*1.35
+                continue
+            if item[1] == 3:
+                price =float(price) + float(item[0])*1.3*1.35
+                continue
+            price += float(item[0])
+        return round(price,1)
+
+    cursor = connection.cursor()
+    cursor.execute("SELECT COUNT(tickets.id) FROM `tickets` WHERE tickets.Confirmed = 1 AND (SELECT schedules.Date FROM `schedules` WHERE schedules.id = tickets.ScheduleID) >= (DATE('2017-12-25')- INTERVAL 1 MONTH)")
+    conf_tickets = list(cursor.fetchall())
+    cursor.execute("SELECT COUNT(tickets.id) FROM `tickets` WHERE tickets.Confirmed = 0 AND (SELECT schedules.Date FROM `schedules` WHERE schedules.id = tickets.ScheduleID) >= (DATE('2017-12-25')- INTERVAL 1 MONTH)")
+    reduse_tickets = list(cursor.fetchall())
+    cursor.execute("SELECT routes.FlightTime FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id JOIN routes ON schedules.RouteID = routes.id WHERE schedules.Date >= (DATE('2017-12-25')- INTERVAL 1 MONTH)")
+    all_times = list(cursor.fetchall())
+    summa = 0
+    for time in all_times:
+        summa += time[0]
+    summa = summa/len(all_times)
+
+    cursor.execute("SELECT COUNT(tickets.id),schedules.Date as d FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE('2017-12-25')- INTERVAL 1 MONTH) GROUP BY schedules.Date ORDER BY COUNT(tickets.id) DESC LIMIT 1")
+    max_pass = list(cursor.fetchall())
+    cursor.execute("SELECT COUNT(tickets.id),schedules.Date as d FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE('2017-12-25')- INTERVAL 1 MONTH) GROUP BY schedules.Date ORDER BY COUNT(tickets.id) LIMIT 1")
+    min_pass = list(cursor.fetchall())
+
+    cursor.execute("SELECT COUNT(tickets.id),PassportNumber FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date >= (DATE('2017-12-25')- INTERVAL 1 MONTH) GROUP BY tickets.PassportNumber ORDER BY COUNT(tickets.id) DESC LIMIT 3")
+    tops = list(cursor.fetchall())
+    top_tickets_buyer = []
+    for top in tops:
+        top = list(top)
+        cursor.execute("SELECT Firstname,Lastname FROM `tickets` WHERE PassportNumber = %s",[top[1]])
+        result = list(cursor.fetchall())
+        print("result",result,"top",top)
+        top.extend(result[0])
+        top_tickets_buyer.append(top)
     
-    context = {}
+    cursor.execute("SELECT COUNT(tickets.id),airports.IATACode FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id JOIN routes ON schedules.RouteID = routes.id JOIN airports ON routes.DepartureAirportID = airports.ID WHERE schedules.Date >= (DATE('2017-06-25')- INTERVAL 1 MONTH) GROUP BY airports.IATACode ORDER BY COUNT(tickets.id) DESC")
+    top_airports = list(cursor.fetchall())
+
+    cursor.execute("SELECT schedules.EconomyPrice,tickets.CabinTypeID FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date = (DATE('2017-12-20')- INTERVAL 1 DAY)")
+    day_sels1 = count_price(list(cursor.fetchall()))
+    print("day_sels1",day_sels1)
+    cursor.execute("SELECT schedules.EconomyPrice,tickets.CabinTypeID FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date = (DATE('2017-12-20')- INTERVAL 2 DAY)")
+    day_sels2 = count_price(list(cursor.fetchall()))
+    cursor.execute("SELECT schedules.EconomyPrice,tickets.CabinTypeID FROM `tickets` JOIN schedules ON tickets.ScheduleID = schedules.id WHERE schedules.Date = (DATE('2017-12-20')- INTERVAL 3 DAY)")
+    day_sels3 = count_price(list(cursor.fetchall()))
+
+
+    elapsed_time = datetime.datetime.now() - start_time
+
+
+    context = {"top_airports":top_airports,"top_tickets_buyer":top_tickets_buyer,"conf_tickets":conf_tickets,"reduse_tickets":reduse_tickets,"summa":summa,"max_pass":max_pass,"min_pass":min_pass,"day_sels1":day_sels1,"day_sels2":day_sels2,"day_sels3":day_sels3,"elapsed_time":elapsed_time.total_seconds()}
     return render(request, 'short_summary.html', context)
+
 
 def extra_amenities(request):
     context = {}
