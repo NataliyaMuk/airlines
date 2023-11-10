@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Amonic</title>
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'mainapp/css/styles.css' %}">
     {% block style %}{% endblock style %}
 </head>
 <body class="container">
     <p>Welcome to Amonic Airlines</p>
+    <p id = "user"> User: {{user}}</p>
     <ul>
-    
-        <li id = "user">
-            User: {{user}}
-        </li>
-
         <li>
             <a href="{% url 'manage-flights' %}">Управление полетами</a>
         </li>
