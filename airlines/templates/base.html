@@ -23,6 +23,10 @@
         <li>
             <a href="{% url 'reports_summary' %}">Reports</a>
         </li>
+        
+        <li>
+            <a href="{% url 'extra_amenities' %}">Extra amenities</a>
+        </li>
     </ul>
     <p class="visually-hidden" id="user_id">{{user.id}}</p>
     {% block content %}

@@ -1102,7 +1102,7 @@ def extra_amenities(request):
             parsed_ticket = parse_Post_mass_str(request.POST.get('parsed_ticket'))
             selected_parsed_flights_id = int(selected_parsed_flights_str.split(',')[0])
             print("selected_parsed_flights_id",selected_parsed_flights_id)
-            cursor.execute("SELECT id FROM `tickets` WHERE ScheduleID = %s and Confirmed = 1 LIMIT 1",[selected_parsed_flights_id])
+            cursor.execute("SELECT id FROM `tickets` WHERE ScheduleID = %s AND BookingReference = %s AND Confirmed = 1 LIMIT 1",[selected_parsed_flights_id,booking_reference])
             tickets_id = int(list(cursor.fetchall())[0][0])
             print("real_tickets_id",tickets_id)
             cursor.execute("SELECT AmenityID FROM `amenitiestickets` WHERE TicketID = %s ",[tickets_id])
@@ -1127,5 +1127,70 @@ def extra_amenities(request):
     return render(request, 'extra_amenities.html', context,)
 
 def report_amonities(request):
-    context = {}
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT `Name` FROM `cabintypes` ")
+    cabin_types = list(cursor.fetchall())
+
+    cursor.execute("SELECT `Service` FROM `amenities` ")
+    amenities_types = list(cursor.fetchall())
+
+    def system_counter(flights):
+        statistic = [[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]]
+        for flight in flights:
+            print("flight",flight)
+            cursor.execute("SELECT * FROM `tickets` WHERE ScheduleID = %s",[int(flight[0])])
+            tickets = list(cursor.fetchall())
+            # print("tickets",tickets)
+            for ticket in tickets:
+                # print("ticket[3]",ticket[3])
+                cursor.execute("SELECT AmenityID FROM `amenitiestickets` WHERE TicketID = %s",[ticket[0]])
+                amenities = list(cursor.fetchall())
+                if ticket[3] == 3:
+                        amenities.extend([[1],[4],[5],[6],[7],[8],[9],[12]])
+                elif ticket[3] == 2:
+                    amenities.extend([[1],[4],[6],[7],[11]])
+                else:
+                    amenities.extend([[7],[11]])
+                for ameniti in amenities:
+                    # print("ameniti[0]",ameniti[0])
+                    statistic[ticket[3]-1][ameniti[0]-1] += 1
+        print("statistic",statistic)
+        return statistic
+
+
+    try:
+        print("A")
+        flightID = request.POST['flightID']
+        print("flightID",flightID)
+        print("B")
+        if flightID == "":
+            try:
+                print("C")
+                From = request.POST['From']
+                To = request.POST['To']
+                print("From",From)
+            except:
+                context = {"error":"Empty input"}
+                return render(request, 'report_amonities.html', context)
+    except:
+        try:
+            print("C")
+            From = request.POST['From']
+            To = request.POST['To']
+            print("From",From)
+        except:
+            context = {"error":"Empty input"}
+            return render(request, 'report_amonities.html', context)
+    if flightID:
+        res = system_counter([[flightID]])
+    try:
+        if From:
+            cursor.execute("SELECT * FROM `schedules` WHERE Date >= %s AND Date <= %s",[From,To])
+            req_flights = list(cursor.fetchall())
+            res = system_counter(req_flights)
+    except:
+        print("Все ок")
+    context = {"statistics":res,"cabin_types":cabin_types,"amenities_types":amenities_types}
     return render(request, 'report_amonities.html', context)
