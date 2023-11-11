@@ -26,6 +26,7 @@ from mainapp import models
 
 import random
 import string
+import ast
 
 
 def user_session(request, email, user_id):
@@ -42,12 +43,9 @@ def user_session(request, email, user_id):
             "UPDATE mainapp_sessions SET last_confirmation=NOW() WHERE mainapp_sessions.status='0' and (SELECT id FROM mainapp_users WHERE email = %s) = user_id",
             [email])
         
-        print("user",user_id)
         cursor.execute("SELECT * FROM `mainapp_sessions` WHERE user_id = %s AND status = 0",[user_id])
         sessions = cursor.fetchall()
-        print("sessions",sessions)
         if sessions == ():
-            print("YSE")
             cursor.execute("INSERT INTO `mainapp_sessions`(`id`, `user_id`, `session_start`,`last_confirmation`, `error_status`, `status`) VALUES (NULL,%s,NOW(),NOW(),'Connection lost.',0)",[user_id])
 
 
@@ -755,7 +753,7 @@ def search_flights(request):
                             parsed_way[2].append(way[-1])
                             # print("int(request.POST['fly_class']",request.POST['fly_class'])
                             # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                            parsed_way[1] += way[5] * float(request.POST['fly_class'])
+                            parsed_way[1] +=float(way[5]) * float(request.POST['fly_class'])
                             parsed_way[1] = round(parsed_way[1], 1)
                             # print("parsed_way[1]", parsed_way[1])
                         parsed_ways.extend(parsed_way)
@@ -771,7 +769,8 @@ def search_flights(request):
                         parsed_way[2].append(way[-1])
                         # print("int(request.POST['fly_class']",request.POST['fly_class'])
                         # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                        parsed_way[1] += way[5] * float(request.POST['fly_class'])
+                        parsed_way[1] += float(way[5]) * float(request.POST['fly_class'])
+                        parsed_way[1] = round(parsed_way[1], 1)
                     parsed_ways.extend(parsed_way)
                     parsed_ways.append(len(ways))
                     paths_outbound.append(parsed_ways)
@@ -807,7 +806,8 @@ def search_flights(request):
                                 parsed_way[2].append(way[7])
                                 # print("int(request.POST['fly_class']",request.POST['fly_class'])
                                 # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                                parsed_way[1] += way[5] * float(request.POST['fly_class'])
+                                parsed_way[1] += float(way[5]) * float(request.POST['fly_class'])
+                                parsed_way[1] = round(parsed_way[1], 1)
                             parsed_ways.extend(parsed_way)
                             # print("parsed_ways]",parsed_ways)
                             parsed_ways.append(len(ways))
@@ -822,7 +822,8 @@ def search_flights(request):
                             parsed_way[2].append(way[-1])
                             # print("int(request.POST['fly_class']",request.POST['fly_class'])
                             # print("int(request.POST['fly_class']",int(request.POST['fly_class']))
-                            parsed_way[1] += way[5] * float(request.POST['fly_class'])
+                            parsed_way[1] += float(way[5]) * float(request.POST['fly_class'])
+                            parsed_way[1] = round(parsed_way[1], 1)
                         parsed_ways.extend(parsed_way)
                         parsed_ways.append(len(ways))
                         paths_return.append(parsed_ways)
@@ -935,23 +936,23 @@ def confirmation_payment(request):
             print("customer",customer,len(customer))
             customers.append(customer)
         for customer in customers:
+            key = generate_key()
             for departAir in departAirs:
-                key = generate_key()
                 print("request.POST['fly_class']",request.POST['fly_class'])
-                for a in [request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],str(request.user),customer[5],customer[3],customer[4],key]:
+                for a in [request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],customer[5],customer[3],customer[4],key]:
                     if type(a) == type(1):
                         print("type",type(a),a)
                     else:
                         print("type",type(a),a,len(a))
                 print("customer[0]",customer[0])
-                cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Email`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT id FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,%s,(SELECT id FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],str(request.user),customer[5],customer[3],customer[4],key])
+                cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT id FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,(SELECT id FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(departAir),request.POST['fly_class'],customer[0],customer[1],customer[5],customer[3],customer[4],key])
             if returnAirs:
+                key = generate_key()
                 for returnAir in returnAirs:
-                    key = generate_key()
-                    cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Email`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT id FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,%s,(SELECT id FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(returnAir),request.POST['fly_class'],customer[0],customer[1],str(request.user),customer[5],customer[3],customer[4],key])
+                    cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT id FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,(SELECT id FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(returnAir),request.POST['fly_class'],customer[0],customer[1],customer[5],customer[3],customer[4],key])
         print("customers",customers)
         context = {}
-        return render(request, 'confirmation_payment.html', context)
+        return redirect('home')
     users = request.POST['users'].split(',/')
     costs = len(users) * float(request.POST['cost_depart']) + len(users) * float(request.POST['cost_return'])
     print(users)
@@ -1020,10 +1021,110 @@ def short_summary(request):
     context = {"top_airports":top_airports,"top_tickets_buyer":top_tickets_buyer,"conf_tickets":conf_tickets,"reduse_tickets":reduse_tickets,"summa":summa,"max_pass":max_pass,"min_pass":min_pass,"day_sels1":day_sels1,"day_sels2":day_sels2,"day_sels3":day_sels3,"elapsed_time":elapsed_time.total_seconds()}
     return render(request, 'short_summary.html', context)
 
-
+@csrf_exempt
 def extra_amenities(request):
-    context = {}
-    return render(request, 'extra_amenities.html', context)
+
+    cursor = connection.cursor()
+
+    def parse_Post_mass_str(input_string):
+        try:
+            parsed_list = ast.literal_eval(input_string)
+            if isinstance(parsed_list, list):
+                return parsed_list
+            else:
+                raise ValueError("Input is not a valid list.")
+        except (ValueError, SyntaxError) as e:
+            print(f"Error parsing string: {e}")
+            return None
+    
+    cursor.execute("SELECT `Service`, `Price`, `ID` FROM `amenities`")
+    services = list(cursor.fetchall())
+    print("services",services)
+
+    
+    if request.method == "POST":
+        status = request.POST['status']
+        print("request.POST['status']",status)
+        if status == "0":
+            booking_reference = request.POST['booking_reference']
+            print("booking_reference",booking_reference)
+            cursor.execute("SELECT tickets.ScheduleID, schedules.Date, schedules.Time, schedules.AircraftID, schedules.RouteID, schedules.EconomyPrice, schedules.Confirmed, schedules.FlightNumber FROM `tickets` JOIN schedules ON schedules.id = tickets.ScheduleID WHERE BookingReference = %s",[booking_reference])
+            flights = list(cursor.fetchall())
+            parsed_flights=[]
+            for flight in flights:
+                cursor.execute("SELECT IATACode as Departure,(SELECT IATACode FROM airports WHERE id = routes.ArrivalAirportID) as Arrival FROM `routes` JOIN airports ON routes.DepartureAirportID = airports.id   WHERE routes.id = %s",[flight[4]])
+                airports = list(cursor.fetchall())
+                flight_ids = []
+                print("airports",airports)
+                airports_str = airports[0][0] + " - " + airports[0][1]
+                parsed_flight = [flight[7],airports_str,flight[1].strftime("%d/%m/%Y"),flight[2].strftime("%H:%M")]
+                flight_ids.append(flight[0])
+                parsed_flights.append(parsed_flight)
+            parsed_flights_str = []
+            for parsed_flight in parsed_flights:
+                parsed_flight_str = ""
+                for item in parsed_flight:
+                    parsed_flight_str = parsed_flight_str +" " + item + ","
+                parsed_flight_str = parsed_flight_str[:-1]
+                parsed_flights_str.append(parsed_flight_str)
+            cursor.execute("SELECT * FROM `tickets` WHERE BookingReference = %s and Confirmed = 1 LIMIT 1 ",[booking_reference])
+            tickets = list(cursor.fetchall())[0]
+            parsed_ticket = [tickets[4]+" "+tickets[5],tickets[7]]
+            if tickets[3] == 3:
+                parsed_ticket.append("First Class")
+            if tickets[3] == 2:
+                parsed_ticket.append("Business")
+            else:
+                parsed_ticket.append("Economy")
+            cursor.execute("SELECT AmenityID FROM `amenitiescabintype` WHERE CabinTypeID = %s ",[tickets[3]])
+            cabin_types_amentities = list(cursor.fetchall())
+            cabin_type_amentities = []
+            for cabin_types_amentitie in cabin_types_amentities:
+                cabin_type_amentities.append(cabin_types_amentitie[0])
+            print("tickets[3]",tickets[3])
+            print("cabin_type_amentities",cabin_type_amentities)
+            # print("booked_amenties",booked_amenties)
+            print("tickets",tickets)
+            print("parsed_flights",parsed_flights)
+            context = {"status":"1","parsed_flights":parsed_flights,"flight_ids":flight_ids,"parsed_flights_str":parsed_flights_str,"parsed_ticket":parsed_ticket,"booking_reference":booking_reference,"services":services,"cabin_type_amentities":cabin_type_amentities}
+            return render(request, 'extra_amenities.html', context)
+        if status == "1":
+            print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            print("status",status)
+            booking_reference = request.POST.get('booking_reference')
+            flight = request.POST.get('flight')
+            parsed_flights_str = parse_Post_mass_str(request.POST.get('parsed_flights_str'))
+            cabin_type_amentities = parse_Post_mass_str(request.POST.get('cabin_type_amentities'))
+            print("cabin_type_amentities",cabin_type_amentities)
+            booked_amenties = parse_Post_mass_str(request.POST.get('booked_amenties'))
+            # print("booked_amenties",booked_amenties)
+            selected_parsed_flights_str = parse_Post_mass_str(request.POST.get('parsed_flights_str'))[int(flight)-1]
+            parsed_ticket = parse_Post_mass_str(request.POST.get('parsed_ticket'))
+            selected_parsed_flights_id = int(selected_parsed_flights_str.split(',')[0])
+            print("selected_parsed_flights_id",selected_parsed_flights_id)
+            cursor.execute("SELECT id FROM `tickets` WHERE ScheduleID = %s and Confirmed = 1 LIMIT 1",[selected_parsed_flights_id])
+            tickets_id = int(list(cursor.fetchall())[0][0])
+            print("real_tickets_id",tickets_id)
+            cursor.execute("SELECT AmenityID FROM `amenitiestickets` WHERE TicketID = %s ",[tickets_id])
+            booked_parsed_amenties = list(cursor.fetchall())
+            booked_amenties = []
+            for booked_parsed_amentie in booked_parsed_amenties:
+                booked_amenties.append(booked_parsed_amentie[0])
+            print("booked_amenties",booked_amenties)
+            context = {"status":"2","services":services,"booking_reference":booking_reference,"parsed_flights_str":parsed_flights_str,"parsed_ticket":parsed_ticket,"selected_parsed_flights_str":selected_parsed_flights_str,"cabin_type_amentities":cabin_type_amentities,"booked_amenties":booked_amenties,"tickets_id":tickets_id}
+            return render(request, 'extra_amenities.html', context)
+        if status == "2":
+            checks = request.POST.getlist('checks[]')
+            tickets_id = request.POST.get('tickets_id')
+            print("checks",checks)
+            print("tickets_id",tickets_id)
+            for check in checks:
+                info = check.split(',')
+                print("info",info)
+                cursor.execute("INSERT INTO `amenitiestickets`(`AmenityID`, `TicketID`) VALUES (%s,%s)",[info[2],tickets_id])
+            return redirect('home')
+    context = {"status":"0","services":services}
+    return render(request, 'extra_amenities.html', context,)
 
 def report_amonities(request):
     context = {}

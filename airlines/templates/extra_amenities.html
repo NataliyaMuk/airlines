@@ -2,67 +2,124 @@
 
 {% block content %}
 
-        <form method="post" action="{% url 'book_confirmation' %}">
+        <form method="post" action="{% url 'extra_amenities' %}">
+            {% csrf_token %}
             <label for="Booking">Booking reference:</label>
-            <input type="text" id="booking"/>
+            <input type="text" id="booking" name="booking_reference" {% if booking_reference %}value="{{booking_reference}}"{% endif %}/>
+            <input type="text" class="visually-hidden" name="status" value="0">
             <button id="booking_button">OK</button>
+        </form>
+        <form method="post" action="{% url 'extra_amenities' %}">
+            {% csrf_token %}
             <fieldset class="fieldset__outbound">
                 <legend>Flight list</legend>
                 <div class="Outbound__container">
                     <div class="Outbound__container__object">
                         <label for="Booking">Choose your flights:</label>
-                        <select id="flights-select" name='flights'>
-                                <option value="1" class="visual-none">#</option>
+                        <select id="flights-select" name='flight'>
+                            {% if parsed_flights_str %}
+                                {% for parsed_flight_str in parsed_flights_str %}
+                                    <option value={{forloop.counter}} {% if selected_parsed_flights_str == parsed_flight_str %}selected="selected"{% endif %}>{{parsed_flight_str}}</option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
+                        
+                        <input type="text" class="visually-hidden" name="parsed_flights_str" value="{{parsed_flights_str}}">
+                        <input type="text" class="visually-hidden" name="parsed_ticket" value="{{parsed_ticket}}">
+                        <input type="text" class="visually-hidden" name="status" value="1">
+                        <input type="text" class="visually-hidden" name="cabin_type_amentities" value="{{cabin_type_amentities}}">
+                        <input type="text" class="visually-hidden" name="booked_amenties" value="{{booked_amenties}}">
+                        <input type="text" class="visually-hidden" name="tickets_id" value="{{tickets_id}}">
+                        <!-- <input type="text" class="visually-hidden" name="parsed_ticket0" value="{{parsed_ticket.0}}"> -->
+                        <!-- <input type="text" class="visually-hidden" name="parsed_ticket1" value="{{parsed_ticket.1}}">
+                        <input type="text" class="visually-hidden" name="parsed_ticket2" value="{{parsed_ticket.2}}"> -->
+                        <input type="text" class="visually-hidden" name="booking_reference" value="{{booking_reference}}">
                         <button id="show_amenities_button">Show Amenities</button>
                     </div>
                 </div>
             </fieldset>
-
-            <div class="Output__container__object">
-                        <div style="display: inline-block;">Full name: </div>
-                        <div style="display: inline-block;">Passport Number: </div>
-                        <div style="display: inline-block;">Your cabin class is: </div>
-            </div>
-
-
-
-        <fieldset class="fieldset__filter">
-                <legend>Passenger details</legend>
-                <div class="filter__container">
-                        <div class="select__or__input__container">
-                            <label for="SoftDrinks">Soft Drinks (Free)</label>
-                            <input type="checkbox" id="SoftDrinks"/>
-
-                            <label for="Wi-fi_50">Wi-Fi 50Mb (Free)</label>
-                            <input type="checkbox" id="Wi-fi_50"/>
-
-                            <label for="NextSeatFree">Next Seat Free ($30)</label>
-                            <input type="checkbox" id="NextSeatFree"/>
-
-                            <label for="Wi-fi_250">Wi-Fi 250Mb ($50)</label>
-                            <input type="checkbox" id="Wi-fi_250"/>
-
-                            <label for="ExtraBag">Extra Bag ($15)</label>
-                            <input type="checkbox" id="ExtraBag"/>
-
-                            <label for="LaptopRental">Laptop Rental ($15)</label>
-                            <input type="checkbox" id="LaptopRental"/>
-
-                        </div>
-
-                </div>
-            </fieldset>
-            <div class="Down_Output__container__object">
-                        <div style="display: inline-block;">Items Selected: </div>
-                        <div style="display: inline-block;">Duties: </div>
-                        <div style="display: inline-block;">Total payable: </div>
-            </div>
-            <button id="save_and_confirm_button">Save and Confirm</button>
-            <button id="exit_button">Exit</button>
+            
         </form>
+            <div class="Output__container__object">
+                        <div style="display: inline-block;">Full name: {{parsed_ticket.0}}</div>
+                        <div style="display: inline-block;">Passport Number: {{parsed_ticket.1}}</div>
+                        <div style="display: inline-block;">Your cabin class is: {{parsed_ticket.2}}</div>
+            </div>
 
 
+        <form method="post" action="{% url 'extra_amenities' %}">   
+            {% csrf_token %} 
+            <fieldset class="fieldset__filter">
+                    <legend>Passenger details</legend>
+                    <div class="filter__container">
+                        {% for service in services %}
+                            <div class="select__or__input__container">
+                                <label for="{{service.0}}"  {% if service.1 == 0 %}class="checked"{% elif service.2 in cabin_type_amentities %}class="checked"{% elif service.2 in booked_amenties %}class="checked"{% else %}class="{{service.1}}"{% endif %}>{{service.0}} {% if service.1 == 0 %}(Free){% elif service.2 in cabin_type_amentities %}(Free){% elif service.2 in booked_amenties %}(Free){% else %}({{service.1}}){% endif %}</label>
+                                <input type="checkbox" {% if service.1 == 0 %}disabled checked="checked"{% elif service.2 in cabin_type_amentities %}disabled checked="checked"{% elif service.2 in booked_amenties %}disabled checked="checked"{% else %}{% endif %} id="{{service.0}}" name="checks[]" value="{{service.0}},{{service.1}},{{service.2}}"/>      
+                            </div>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+                <div class="Down_Output__container__object">
+                            <div style="display: inline-block;" id="Items_Selected">Items Selected: </div>
+                            <div style="display: inline-block;" id="Duties">Duties: </div>
+                            <div style="display: inline-block;" id="Total_payable">Total payable: </div>
+                </div>
+                <input type="text" class="visually-hidden" name="status" value="2">
+                <input type="text" class="visually-hidden" name="tickets_id" value="{{tickets_id}}">
+                <button id="save_and_confirm_button">Save and Confirm</button>
+        </form>
+            <a id="exit_button" style="text-decoration:none" href="{% url 'home' %}">On HOME page</a>
 
+<style>
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+        clip: rect(0 0 0 0);
+    }   
+    .checked{
+        color: gray;
+    }
+</style>
+
+<script>
+    function updateTotalPrice() {
+        const checkboxes = document.getElementsByName('checks[]');
+        let totalPrice = 0;
+        let totalCount = 0;
+
+        for (const checkbox of checkboxes) {
+            if (checkbox.checked) {
+            const value = checkbox.value.split(',')[1]; // Получите значение service.1
+            console.log("checkbox.previousSibling.textContent.slice(-6)",checkbox.previousSibling.previousSibling.textContent.slice(-6))
+            if (checkbox.previousSibling.previousSibling.textContent.slice(-6) != "(Free)"){
+                totalPrice += parseFloat(value);
+                totalCount += 1
+            }
+                
+            console.log("totalPrice",totalPrice)
+            console.log("totalCount",totalCount)
+            }
+        }
+
+        document.getElementById('Total_payable').textContent ="Total payable: " + totalPrice*1.05;
+        document.getElementById('Duties').textContent ="Duties: " + totalPrice*0.05;
+        document.getElementById('Items_Selected').textContent ="Items Selected: " + totalCount;
+        }
+
+        // Привяжите функцию к событию изменения каждого флажка
+        const checkboxes = document.getElementsByName('checks[]');
+        for (const checkbox of checkboxes) {
+        checkbox.addEventListener('change', updateTotalPrice);
+        }
+
+        // Инициализация: обновите цену при загрузке страницы
+        updateTotalPrice();
+</script>
 
 {% endblock %}
