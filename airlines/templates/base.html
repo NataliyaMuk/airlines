@@ -13,15 +13,15 @@
     <p id = "user"> User: {{user}}</p>
     <ul>
         <li>
-            <a href="{% url 'manage-flights' %}">Управление полетами</a>
+            <a href="{% url 'manage-flights' %}">Flights controll</a>
         </li>
 
         <li>
-            <a href="{% url 'search-flights' %}">Поиск рейсов</a>
+            <a href="{% url 'search-flights' %}">Search flights</a>
         </li>
 
         <li>
-            <a href="{% url 'reports_summary' %}">Отчеты</a>
+            <a href="{% url 'reports_summary' %}">Reports</a>
         </li>
     </ul>
     <p class="visually-hidden" id="user_id">{{user.id}}</p>

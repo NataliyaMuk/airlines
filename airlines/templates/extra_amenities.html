@@ -95,7 +95,7 @@
 
         for (const checkbox of checkboxes) {
             if (checkbox.checked) {
-            const value = checkbox.value.split(',')[1]; // Получите значение service.1
+            const value = checkbox.value.split(',')[1]; 
             console.log("checkbox.previousSibling.textContent.slice(-6)",checkbox.previousSibling.previousSibling.textContent.slice(-6))
             if (checkbox.previousSibling.previousSibling.textContent.slice(-6) != "(Free)"){
                 totalPrice += parseFloat(value);
@@ -112,13 +112,11 @@
         document.getElementById('Items_Selected').textContent ="Items Selected: " + totalCount;
         }
 
-        // Привяжите функцию к событию изменения каждого флажка
         const checkboxes = document.getElementsByName('checks[]');
         for (const checkbox of checkboxes) {
         checkbox.addEventListener('change', updateTotalPrice);
         }
 
-        // Инициализация: обновите цену при загрузке страницы
         updateTotalPrice();
 </script>
 
