@@ -168,14 +168,14 @@ class Schedules(models.Model):
 
     # Метод для вычисления цены бизнес класса
     def calculate_business_price(self):
-        econom_price = self.EconomyPrice
+        econom_price = float(self.EconomyPrice)
         business_price = math.floor(econom_price + econom_price * 0.35)
         return business_price
 
     def calculate_first_class_price(self):
-        econom_price = self.EconomyPrice
+        econom_price = float(self.EconomyPrice)
         first_class_price = math.floor(
-            (econom_price + econom_price * 0.35) + (econom_price + econom_price * 0.35) * 0.3)
+            (econom_price +  econom_price * 0.35) + (econom_price + econom_price * 0.35) * 0.3)
         return first_class_price
 
     class Meta:

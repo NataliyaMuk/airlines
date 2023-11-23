@@ -252,6 +252,13 @@ def manage_flights(request):
 
     airports = Airports.objects.all()
 
+    print("airports",airports)
+    for schedule in schedules:
+        print("WTF")
+        print("schedulesEconomyPrice",float(schedule.EconomyPrice) * 0.35)
+        print("typeschedulesEconomyPrice",type(schedule.EconomyPrice))
+        print("schedules",schedule.calculate_first_class_price())
+
     context = {'schedules': schedules, 'airports': airports}
     return render(request, 'manage-flights.html', context)
 
@@ -302,7 +309,8 @@ def add_file_form(request):
         requestresult = cursor.fetchall()
         for (title) in requestresult:
             if str(File) == title[0]:
-                return redirect('home_admin')
+                form = AddFileForm()
+                return render(request, 'add_file_form.html', {'form': form,'error':'Попытка повторной загрузки одного и того же файла недопустима.'})
         for row in File:
             words = str(row).split(',')
             words[0] = words[0][2:]
@@ -331,7 +339,7 @@ def add_file_form(request):
         # results.append(cursor.execute("SELECT `Title` FROM `mainapp_files` WHERE Title = %s",['txt1']))
         cursor.execute("INSERT INTO `mainapp_files`(`Title`) VALUES (%s)", [str(File)])
         context = {'files': results, 'readers': [request.FILES["file"]]}
-        return render(request, 'error_page.html', context)
+        return redirect('manage-flights')
     else:
         form = AddFileForm()
         return render(request, 'add_file_form.html', {'form': form})
@@ -936,6 +944,7 @@ def confirmation_payment(request):
             print("customer",customer,len(customer))
             customers.append(customer)
         for customer in customers:
+            print("AAAAAAAAAAAAAAAAAAA")
             key = generate_key()
             for departAir in departAirs:
                 print("request.POST['fly_class']",request.POST['fly_class'])
@@ -952,7 +961,7 @@ def confirmation_payment(request):
                     cursor.execute("INSERT INTO `tickets`(`UserID`, `ScheduleID`, `CabinTypeID`, `Firstname`, `Lastname`, `Phone`, `PassportNumber`, `PassportCountryID`, `BookingReference`, `Confirmed`) VALUES (%s,%s,(SELECT id FROM `cabintypes` WHERE name = %s),%s,%s,%s,%s,(SELECT id FROM `countries` WHERE name = %s),%s,1)",[request.user.id,int(returnAir),request.POST['fly_class'],customer[0],customer[1],customer[5],customer[3],customer[4],key])
         print("customers",customers)
         context = {}
-        return redirect('home')
+        return render(request, 'confirmation_payment.html', context)
     users = request.POST['users'].split(',/')
     costs = len(users) * float(request.POST['cost_depart']) + len(users) * float(request.POST['cost_return'])
     print(users)
@@ -1057,16 +1066,18 @@ def extra_amenities(request):
                 flight_ids = []
                 print("airports",airports)
                 airports_str = airports[0][0] + " - " + airports[0][1]
-                parsed_flight = [flight[7],airports_str,flight[1].strftime("%d/%m/%Y"),flight[2].strftime("%H:%M")]
+                parsed_flight = [flight[0],airports_str,flight[1].strftime("%d/%m/%Y"),flight[2].strftime("%H:%M")]
+                print("flight[7]",flight[7])
                 flight_ids.append(flight[0])
                 parsed_flights.append(parsed_flight)
             parsed_flights_str = []
             for parsed_flight in parsed_flights:
                 parsed_flight_str = ""
                 for item in parsed_flight:
-                    parsed_flight_str = parsed_flight_str +" " + item + ","
+                    parsed_flight_str = parsed_flight_str +" " + str(item) + ","
                 parsed_flight_str = parsed_flight_str[:-1]
                 parsed_flights_str.append(parsed_flight_str)
+            print("parsed_flights_str",parsed_flights_str)
             cursor.execute("SELECT * FROM `tickets` WHERE BookingReference = %s and Confirmed = 1 LIMIT 1 ",[booking_reference])
             tickets = list(cursor.fetchall())[0]
             parsed_ticket = [tickets[4]+" "+tickets[5],tickets[7]]

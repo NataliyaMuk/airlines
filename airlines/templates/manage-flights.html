@@ -110,7 +110,7 @@
 
             <button class="button" id="submit-btn">Edit Flight</button>
 
-            <button class="import-btn"id="import-btn">Import changes</button>
+            <a class="import-btn button"id="import-btn" href="{% url 'add_file_form' %}">Import changes</a>
 
     </div>
 
@@ -142,6 +142,22 @@
    			<button id="close">Close</button>
   		</p>
     </dialog>
+
+    <style>
+        a.button {
+            -webkit-appearance: button;
+            -moz-appearance: button;
+            appearance: button;
+
+            text-decoration: none;
+            color: initial;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            padding-left: 4px;
+            padding-right: 4px;
+            border: 1px black solid;
+        }
+    </style>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

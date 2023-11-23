@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form action="{% url 'add_file_form' %}" method="post" enctype="multipart/form-data">
+    <h2 class="add_file_title">Загрузить файл с изменениями для бд:</h2>
+    {% if error %}
+        <p class="error">{{error}}</p>
+    {% endif %}
+    <form action="{% url 'add_file_form' %}" method="post" class="add_form" enctype="multipart/form-data">
         {{form.file}}
         {% csrf_token %}
         <div class="btn-container">
@@ -11,5 +15,32 @@
 
     </form>
 
-    
+    <style>
+        .add_file_title{
+            text-align: center;
+        }
+        .add_form{
+            margin: 0 auto;
+            padding: 10px;
+            border: 2px black solid;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+        }
+        .btn-container{
+            width: 110px;
+            margin: 0 auto;
+            margin-top: 5px;
+        }
+        .error{
+            background-color: red;
+            text-align: center;
+            margin: 0 auto;
+            width: 480px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+    </style>
 {% endblock %}
